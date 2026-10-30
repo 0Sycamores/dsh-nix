@@ -1,5 +1,10 @@
 # 切换与验收清单（Gate 2 人工部分）
 
+> 验收记录：2026-10-31，`laptop` 主机 `nixos-rebuild switch --flake .#laptop` 后
+> `scripts/verify-desktop.sh` **全部 PASS**；桌面端已从应用启动器正常启动并日常使用
+> （窗口 `app_id=deepseek-harness`、Host 就绪、home patch 5 层生效）；旧 CLI
+> `dsh --version` 仍为 `0.2.2-alpha.2`。
+
 ## nixos-config 接线（已提交到本地仓库，未推送）
 
 改动：

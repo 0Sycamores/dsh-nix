@@ -91,3 +91,11 @@ usable`），而 `electron_44-bin` dist 与 Gate 0 spike 一致、可正常开�
 
 结论：公开模块 + overlay + `cli.enable` 在用户配置之外可独立工作；`nix flake check --no-build`
 （packages/devShells/formatter/checks）也通过。
+
+## 最终验收（2026-10-31）
+
+- `laptop` 主机 `nixos-rebuild switch --flake .#laptop` 成功（system generation 更新）；
+- `scripts/verify-desktop.sh` 全部 PASS：launcher/desktop entry（文件而非目录）、icon、
+  home patch 及其 5 个 layer patch 被 dsh 配置层接受、permission presets 进入合成配置；
+- 从应用启动器启动桌面端，窗口 `app_id=deepseek-harness`、Host 就绪并日常使用；
+- 旧 CLI `dsh --version` 仍为 `0.2.2-alpha.2`（未被新包影响）。
