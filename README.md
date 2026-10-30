@@ -72,6 +72,18 @@ profile 生效，优先于 profile 层）；旧 `settings.yaml` 的键名（如 
 
 `cli.enable = true` 时提供一个复用桌面 payload 官方 Node/CLI 的终端 `dsh`。
 
+## 开发与质量门
+
+```sh
+nix develop                 # 固定工具链（node/pnpm/python3/shellcheck/nixfmt/...）
+bash scripts/check.sh       # 廉价门禁：可执行位/shellcheck/nixfmt/flake eval/轻量 checks/verify 自测
+bash scripts/check.sh --full  # 额外构建 dsh-desktop（约 1.3G，日常不必）
+```
+
+CI（[.github/workflows/ci.yml](.github/workflows/ci.yml)）跑同一脚本，不构建桌面端。
+`checks` 里的 `hm-module` 用 dummy 包渲染 Home Manager 输出（含 desktop entry 必须是普通文件
+的回归检查），`runtime-lockfile` 校验 lockfile 与 patch hash。agent 入口见 [AGENTS.md](AGENTS.md)。
+
 ## 文档
 
 - [docs/desktop-build.md](docs/desktop-build.md)：载荷流水线、Linux 适配与 Gate 0 结论

@@ -49,3 +49,13 @@
   已改为 `source = "${desktopItem}/share/applications/deepseek-harness.desktop"` 指向文件本身。
 - 验收脚本改为优先读取系统实际安装的 `dsh-desktop`（NixOS HM 默认装到
   `/etc/profiles/per-user/<user>`），icon 检查同时覆盖包路径与用户 profile。
+
+## Retro 后续（2026-10-31）
+
+根据本次 build 的 retrospective，新增确定性门禁而不是更多文字规则：
+
+- `checks.hm-module`（dummy package）覆盖“desktop entry source 指向目录”这类只在切换后暴露的 bug；
+- `checks.scripts` / `checks.runtime-lockfile` 覆盖 shellcheck、格式化、lockfile 与 patch hash 不变量；
+- `scripts/check.sh` + `.github/workflows/ci.yml` 提供本地与 CI 共用的廉价门禁；
+- `scripts/verify-desktop.sh --self-test` 用夹具回归验收脚本自身的路径/断言逻辑；
+- `AGENTS.md` 记录导航指针与不变量（IFD、pipefail、pkill 自身、host 判断等 gotchas）。

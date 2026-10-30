@@ -31,21 +31,27 @@ let
   runtimeLock = lib.importJSON (upstreamSrc + "/scripts/primary-runtime/lock.json");
   target = "linux-x64";
   targetLock = runtimeLock.targets.${target};
-  sri = hex: builtins.convertHash { hash = "sha256:${hex}"; toHashFormat = "sri"; };
+  sri =
+    hex:
+    builtins.convertHash {
+      hash = "sha256:${hex}";
+      toHashFormat = "sri";
+    };
   nodeArchive = "node-v${runtimeLock.nodeVersion}-${targetLock.nodeArchive}";
   pythonArchive = "cpython-${runtimeLock.pythonVersion}+${runtimeLock.pythonRelease}-${targetLock.pythonTarget}-install_only_stripped.tar.gz";
-  assetRecords =
-    [
-      {
-        url = "https://nodejs.org/dist/v${runtimeLock.nodeVersion}/${nodeArchive}";
-        sha256 = targetLock.nodeSha256;
-      }
-      {
-        url = "https://github.com/astral-sh/python-build-standalone/releases/download/${runtimeLock.pythonRelease}/${builtins.replaceStrings [ "+" ] [ "%2B" ] pythonArchive}";
-        sha256 = targetLock.pythonSha256;
-      }
-    ]
-    ++ map (wheel: { inherit (wheel) url sha256; }) (runtimeLock.wheels ++ targetLock.wheels);
+  assetRecords = [
+    {
+      url = "https://nodejs.org/dist/v${runtimeLock.nodeVersion}/${nodeArchive}";
+      sha256 = targetLock.nodeSha256;
+    }
+    {
+      url = "https://github.com/astral-sh/python-build-standalone/releases/download/${runtimeLock.pythonRelease}/${
+        builtins.replaceStrings [ "+" ] [ "%2B" ] pythonArchive
+      }";
+      sha256 = targetLock.pythonSha256;
+    }
+  ]
+  ++ map (wheel: { inherit (wheel) url sha256; }) (runtimeLock.wheels ++ targetLock.wheels);
   fetched = map (asset: {
     inherit (asset) sha256;
     file = pkgs.fetchurl {

@@ -8,6 +8,11 @@
       url = "github:deepseek-ai/deepseek-harness/dsh-v0.2.2-alpha.2";
       flake = false;
     };
+    # 仅用于 checks.hm-module：在 CI/本地渲染 HM 模块输出，不必等用户切换。
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -15,6 +20,7 @@
       self,
       nixpkgs,
       dsh-src,
+      home-manager,
       ...
     }:
     let
@@ -23,7 +29,13 @@
 
       srcVersion = (nixpkgs.lib.importJSON (dsh-src + "/apps/desktop/package.json")).version;
 
-      mkPayload = pkgs: pkgs.callPackage ./nix/payload.nix { inherit pkgs; src = dsh-src; srcRevision = dsh-src.rev or "0000000000000000000000000000000000000000"; };
+      mkPayload =
+        pkgs:
+        pkgs.callPackage ./nix/payload.nix {
+          inherit pkgs;
+          src = dsh-src;
+          srcRevision = dsh-src.rev or "0000000000000000000000000000000000000000";
+        };
       mkRuntime =
         pkgs: payload:
         pkgs.callPackage ./nix/runtime.nix {
@@ -46,8 +58,7 @@
     in
     {
       packages = forAllSystems (
-        pkgs: system:
-        {
+        pkgs: system: {
           dsh-desktop = mkDesktop pkgs;
           dsh-desktop-payload = mkPayload pkgs;
           dsh-desktop-runtime = mkRuntime pkgs (mkPayload pkgs);
@@ -64,14 +75,25 @@
         dsh-desktop = ./nix/modules/desktop.nix;
       };
 
-      devShells = forAllSystems (pkgs: _: {
-        default = pkgs.callPackage ./nix/dev-shell.nix { inherit dsh-src; };
-      });
+      devShells = forAllSystems (
+        pkgs: _: {
+          default = pkgs.callPackage ./nix/dev-shell.nix { inherit dsh-src; };
+        }
+      );
 
       formatter = forAllSystems (pkgs: _: pkgs.nixfmt);
 
-      checks = forAllSystems (pkgs: system: {
-        dsh-desktop = self.packages.${system}.dsh-desktop;
-      });
+      checks = forAllSystems (
+        pkgs: system: {
+          dsh-desktop = self.packages.${system}.dsh-desktop;
+          # 轻量门禁：不构建 1.3G 桌面端，只渲染 HM 输出/静态检查。
+          hm-module = pkgs.callPackage ./nix/tests/hm-module.nix {
+            inherit home-manager;
+            dsh-nix = self;
+          };
+          scripts = pkgs.callPackage ./nix/tests/scripts.nix { src = self; };
+          runtime-lockfile = pkgs.callPackage ./nix/tests/runtime-lockfile.nix { src = self; };
+        }
+      );
     };
 }

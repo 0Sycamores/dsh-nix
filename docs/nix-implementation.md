@@ -99,3 +99,16 @@ usable`），而 `electron_44-bin` dist 与 Gate 0 spike 一致、可正常开�
   home patch 及其 5 个 layer patch 被 dsh 配置层接受、permission presets 进入合成配置；
 - 从应用启动器启动桌面端，窗口 `app_id=deepseek-harness`、Host 就绪并日常使用；
 - 旧 CLI `dsh --version` 仍为 `0.2.2-alpha.2`（未被新包影响）。
+
+## 质量门与 CI（retro 之后）
+
+- `checks.hm-module`：用 dummy package 构建 standalone Home Manager 配置，断言
+  `~/.local/share/applications/deepseek-harness.desktop` 是普通文件（本次真实 bug 的回归）、
+  home patch 的 id、launcher/CLI wrapper 指向；不构建 1.3G 桌面端。
+- `checks.scripts`：shellcheck + `bash -n` + `nixfmt --check`。
+- `checks.runtime-lockfile`：lockfile 无 registry URL；`patchedDependencies` 与
+  `nix/runtime/project/patches/*.patch` 的 sha256 一致。
+- `scripts/check.sh`：本地/CI 统一入口（可执行位、shellcheck、nixfmt、`nix flake check --no-build`、
+  三个轻量 check、`verify-desktop.sh --self-test`）；`--full` 才构建桌面端。
+- `.github/workflows/ci.yml`：push/PR 跑 `bash scripts/check.sh`。
+- `AGENTS.md`：导航与不变量（离线/FOD、dontFixup 字节保护、生成物不可手改、工具链、用户切换+验收）。

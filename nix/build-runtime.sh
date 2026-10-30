@@ -43,5 +43,6 @@ export DSH_DESKTOP_RUNTIME_LOCKFILE="$RUNTIME_LOCKFILE"
 export DSH_DESKTOP_PNPM_OFFLINE=1
 export DSH_DESKTOP_DEFER_NATIVE_SMOKE=1
 # 沙箱里不能执行 payload 的外来二进制；用 nix node（同版本 24.21.0）跑 pnpm。
-export DSH_DESKTOP_HOST_NODE="$(command -v node)"
+DSH_DESKTOP_HOST_NODE=$(command -v node)
+export DSH_DESKTOP_HOST_NODE
 pnpm --dir apps/desktop run prepare:dsh -- --defer-runtime-smoke

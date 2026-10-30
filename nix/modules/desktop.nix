@@ -22,12 +22,10 @@ let
     "shell" = "bash-sandbox";
   };
 
-  settingsRows = lib.mapAttrsToList (
-    id: value: {
-      id = legacySettingsIds.${id} or id;
-      config = value;
-    }
-  ) cfg.settings;
+  settingsRows = lib.mapAttrsToList (id: value: {
+    id = legacySettingsIds.${id} or id;
+    config = value;
+  }) cfg.settings;
   patchRows = settingsRows ++ cfg.patches;
 
   environmentSource = lib.concatMapStringsSep "\n" (file: ''
@@ -140,24 +138,24 @@ in
 
     home.packages = [ cfg.package ];
 
-    home.file =
-      {
-        ".local/bin/dsh-desktop".source = launcher;
-      }
-      // lib.optionalAttrs (patchRows != [ ]) {
-        # force：home 层是声明式真源；应用/恢复流程不会改它，激活时覆盖手写内容。
-        "${homeRelative}/cordis.patch.yml" = {
-          source = yaml.generate "dsh-home-patch.yml" patchRows;
-          force = true;
-        };
-      }
-      // lib.optionalAttrs cfg.cli.enable {
-        ".local/bin/dsh".source = cli;
-      }
-      // {
-        # makeDesktopItem 的输出是目录（share/applications/...），home.file 需要指向文件本身。
-        ".local/share/applications/deepseek-harness.desktop".source = "${desktopItem}/share/applications/deepseek-harness.desktop";
+    home.file = {
+      ".local/bin/dsh-desktop".source = launcher;
+    }
+    // lib.optionalAttrs (patchRows != [ ]) {
+      # force：home 层是声明式真源；应用/恢复流程不会改它，激活时覆盖手写内容。
+      "${homeRelative}/cordis.patch.yml" = {
+        source = yaml.generate "dsh-home-patch.yml" patchRows;
+        force = true;
       };
+    }
+    // lib.optionalAttrs cfg.cli.enable {
+      ".local/bin/dsh".source = cli;
+    }
+    // {
+      # makeDesktopItem 的输出是目录（share/applications/...），home.file 需要指向文件本身。
+      ".local/share/applications/deepseek-harness.desktop".source =
+        "${desktopItem}/share/applications/deepseek-harness.desktop";
+    };
 
   };
 }

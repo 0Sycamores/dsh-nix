@@ -11,7 +11,8 @@ export pnpm_config_trust_lockfile=true
 # 非 git 源码树：用锁定的上游 tag commit 生成浏览器构建元数据。
 export DSH_CLIENT_COMMIT_HASH="${SRC_REVISION:?}"
 # release/pack 脚本通过 npm_execpath 找回 pnpm；pnpm exec 不设置它。
-export npm_execpath="$(command -v pnpm)"
+npm_execpath=$(command -v pnpm)
+export npm_execpath
 
 STORE="$TMPDIR/store-monorepo"
 mkdir -p "$STORE"

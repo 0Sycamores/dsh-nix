@@ -16,9 +16,14 @@ pkgs.mkShell {
     sqlite
     zstd
     cacert
+    gnutar
+    gzip
     electron_44-bin
-  gnutar
-  gzip
+    # 质量门使用（scripts/check.sh / checks）：固定版本，避免宿主工具漂移。
+    shellcheck
+    nixfmt
+    file
+    desktop-file-utils
   ];
 
   DSH_SRC = "${dsh-src}";
