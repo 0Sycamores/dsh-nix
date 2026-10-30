@@ -69,6 +69,10 @@ stdenv.mkDerivation {
 
     install -Dm644 ${payload}/desktop/resources/icon.png $out/share/icons/hicolor/512x512/apps/dsh-desktop.png
 
+    # 本仓库许可与免责声明随包分发；上游/第三方许可见 NOTICE。
+    install -Dm644 ${../LICENSE} $out/share/licenses/dsh-desktop/LICENSE
+    install -Dm644 ${../NOTICE} $out/share/licenses/dsh-desktop/NOTICE
+
     install -m 644 ${./launcher.sh} $out/bin/dsh-desktop
     chmod u+w $out/bin/dsh-desktop
     substituteInPlace $out/bin/dsh-desktop \
