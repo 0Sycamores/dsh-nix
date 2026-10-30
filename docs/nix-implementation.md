@@ -2,7 +2,7 @@
 
 ## 结构
 
-两个正常派生 + 两个 fetch 类 FOD，构建阶段不联网：
+两个正常派生 + 两个 pnpm 依赖 FOD（`fetchPnpmDeps`）+ 13 个 `fetchurl` 资产 FOD，构建阶段不联网：
 
 | 派生 | 作用 |
 |---|---|
@@ -42,10 +42,13 @@ hash 位置：`nix/payload.nix`（`monorepoDepsHash`）、`nix/runtime.nix`（`r
 scripts/update.sh dsh-v0.2.3
 ```
 
-联网只发生在 fetch 类 FOD 与更新检出中的 `pnpm install`。脚本依次：改 flake 输入并
-`nix flake update dsh-src` → 检出 tag、应用补丁、安装依赖 → 构建 payload（必要时刷新
-`monorepoDepsHash`）→ 重新生成运行期 lockfile → 刷新 `runtimeDepsHash` → 全离线重建
-`dsh-desktop` 并打印 store 路径。
+联网只发生在 fetch 类 FOD 与更新检出中的 `pnpm install`。脚本先用 `nix develop` 把
+node/pnpm/git/python3 固定到本仓库 flake.lock 的 nixpkgs（避免生成 lockfile 的 pnpm 版本
+随宿主漂移），然后：改 flake 输入并 `nix flake update dsh-src` → 检出 tag、应用补丁、
+安装依赖 → 构建 payload（必要时刷新 `monorepoDepsHash`）→ 重新生成运行期项目/lockfile →
+刷新 `runtimeDepsHash` → 全离线重建 `dsh-desktop` 并打印 store 路径。失败时用 `trap`
+回滚 `flake.nix`/`flake.lock`/两个 hash 文件/`nix/runtime`；成功时断言改动只落在
+白名单路径内。
 
 ## Linux 适配补丁
 

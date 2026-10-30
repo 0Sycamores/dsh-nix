@@ -12,10 +12,11 @@ cp -a "$OUT_SHELL/node_modules" "$out/shell-node-modules"
 
 # 已构建的源码树快照：运行期装配派生用它来跑 prepare:dsh，避免重复 6 分钟构建。
 mkdir -p "$out/src"
-tar --exclude='./node_modules' \
+tar --exclude='node_modules' \
     --exclude='./apps/desktop/.desktop-build' \
     --exclude='./.git' \
     --exclude='./.dsh-build' \
     --exclude='./.spike' \
     --exclude='./.desktop-build' \
+    --exclude='./.dsh-nix-*' \
     -cf - . | tar -xf - -C "$out/src"

@@ -11,12 +11,12 @@ for tgz in "$@"; do
   find "$work" -type d -exec chmod 755 {} +
   find "$work" -type f -perm -u+x -exec chmod 755 {} +
   find "$work" -type f ! -perm -u+x -exec chmod 644 {} +
-  entries=$(cd "$work" && find . -mindepth 1 -maxdepth 1 -printf '%P\n' | LC_ALL=C sort)
+  mapfile -d '' entries < <(cd "$work" && find . -mindepth 1 -maxdepth 1 -printf '%P\0' | LC_ALL=C sort -z)
   # 保留 tar 内的一级前缀（通常是 package/）；多个前缀逐一声明。
   tar --create --file "$work/../payload.tar" \
     --directory "$work" \
     --sort=name --mtime=@499162500 --owner=0 --group=0 --numeric-owner \
-    --format=gnu $entries
+    --format=gnu "${entries[@]}"
   gzip -9 -n -c "$work/../payload.tar" > "$tgz.tmp"
   mv "$tgz.tmp" "$tgz"
   rm -rf "$work" "$work/../payload.tar"

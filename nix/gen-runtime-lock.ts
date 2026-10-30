@@ -8,7 +8,7 @@
  * 输入包集来自 `nix build .#dsh-desktop-payload` 的输出（tarball 已确定性重打包），
  * 因此 file: 依赖的 integrity 在后续 Nix 构建中保持稳定。
  */
-import { cpSync, copyFileSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { cpSync, copyFileSync, mkdirSync, mkdtempSync, readFileSync, readdirSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -52,9 +52,4 @@ for (const entry of readdirSync(buildRoot)) {
     cpSync(join(buildRoot, entry), join(projectDir, entry), { recursive: true })
   }
 }
-copyFileSync(join(buildRoot, 'pnpm-lock.yaml'), join(output, 'pnpm-lock.yaml'))
-writeFileSync(
-  join(output, 'pnpm-lock.yaml.meta.json'),
-  `${JSON.stringify({ version: desktop.version, hostProtocolVersion: DESKTOP_HOST_PROTOCOL_VERSION, target: 'linux-x64' }, undefined, 2)}\n`,
-)
-console.log(`runtime lockfile written: ${output}`)
+console.log(`runtime project written: ${projectDir}`)

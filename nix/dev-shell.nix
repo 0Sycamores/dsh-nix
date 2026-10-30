@@ -16,11 +16,13 @@ pkgs.mkShell {
     sqlite
     zstd
     cacert
-    electron_44
+    electron_44-bin
+  gnutar
+  gzip
   ];
 
   DSH_SRC = "${dsh-src}";
-  ELECTRON_DIST = "${pkgs.electron_44}/libexec/electron";
+  ELECTRON_DIST = "${pkgs."electron_44-bin"}/libexec/electron";
 
   shellHook = ''
     echo "dsh-nix dev shell: node $(node --version), pnpm $(pnpm --version)"

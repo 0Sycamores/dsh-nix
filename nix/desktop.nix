@@ -18,7 +18,8 @@ let
   gtk4Schemas = "${gtk4}/share/gsettings-schemas/gtk4-${gtk4.version}";
   gtk3Schemas = "${gtk3}/share/gsettings-schemas/gtk+3-${gtk3.version}";
   gsettingsSchemas = "${gsettings-desktop-schemas}/share/gsettings-schemas/gsettings-desktop-schemas-${gsettings-desktop-schemas.version}";
-  gioModules = "${dconf}/lib/gio/modules";
+  # dconf 在 nixpkgs 拆分输出；gio 模块在其 lib 输出里。
+  gioModules = "${lib.getLib dconf}/lib/gio/modules";
   gdkPixbufCache = "${librsvg}/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache";
 in
 stdenv.mkDerivation {
@@ -41,6 +42,15 @@ stdenv.mkDerivation {
     librsvg
     dconf
   ];
+
+  meta = {
+    description = "DSH desktop (DeepSeek Harness) packaged for NixOS — personal, unofficial";
+    homepage = "https://github.com/0Sycamores/dsh-nix";
+    license = lib.licenses.mit;
+    platforms = [ "x86_64-linux" ];
+    mainProgram = "dsh-desktop";
+    sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
+  };
 
   installPhase = ''
     runHook preInstall

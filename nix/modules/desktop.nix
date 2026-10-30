@@ -31,8 +31,8 @@ let
   patchRows = settingsRows ++ cfg.patches;
 
   environmentSource = lib.concatMapStringsSep "\n" (file: ''
-    if [ -r "${file}" ]; then
-      . "${file}"
+    if [ -r ${lib.escapeShellArg file} ]; then
+      . ${lib.escapeShellArg file}
     fi
   '') cfg.environmentFiles;
 
@@ -98,13 +98,16 @@ in
       description = ''
         声明式设置：键为 patch 行 id，值为该行的 config。写入
         $DSH_HOME/cordis.patch.yml；旧 settings.yaml 键名（如 ui-onboarding）会重映射。
+
+        注意：上游 patch 语义是**整行替换**该 id 的 config，不是深合并。每行必须写全
+        需要的键（例如 permission 行要连同 presets 一起写），否则该行原有键会被清掉。
       '';
     };
 
     patches = lib.mkOption {
       type = lib.types.listOf yaml.type;
       default = [ ];
-      description = "追加到 home 层、按顺序应用的原始 patch 行（settings 之后）。";
+      description = "追加到 home 层、按顺序应用的原始 patch 行（settings 之后，语义同上：整行替换）。";
     };
 
     cli.enable = lib.mkOption {
@@ -122,9 +125,18 @@ in
       {
         assertion =
           lib.hasPrefix "${config.home.homeDirectory}/" cfg.dshHome
+          && cfg.dshHome != config.home.homeDirectory
           && !(lib.elem ".." (lib.splitString "/" cfg.dshHome))
           && !(lib.hasSuffix "/" cfg.dshHome);
-        message = "programs.dsh-desktop.dshHome 必须是家目录内不含 .. 且无尾斜杠的绝对路径。";
+        message = "programs.dsh-desktop.dshHome 必须是家目录内、不等于家目录、不含 .. 且无尾斜杠的绝对路径。";
+      }
+      {
+        assertion =
+          let
+            ids = map (row: row.id or null) patchRows;
+          in
+          lib.length ids == lib.length (lib.unique ids);
+        message = "programs.dsh-desktop.settings/patches 中存在重复的 patch 行 id。";
       }
     ];
 
@@ -135,6 +147,7 @@ in
         ".local/bin/dsh-desktop".source = launcher;
       }
       // lib.optionalAttrs (patchRows != [ ]) {
+        # force：home 层是声明式真源；应用/恢复流程不会改它，激活时覆盖手写内容。
         "${homeRelative}/cordis.patch.yml" = {
           source = yaml.generate "dsh-home-patch.yml" patchRows;
           force = true;

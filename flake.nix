@@ -23,7 +23,7 @@
 
       srcVersion = (nixpkgs.lib.importJSON (dsh-src + "/apps/desktop/package.json")).version;
 
-      mkPayload = pkgs: pkgs.callPackage ./nix/payload.nix { inherit pkgs; src = dsh-src; srcRevision = dsh-src.rev; };
+      mkPayload = pkgs: pkgs.callPackage ./nix/payload.nix { inherit pkgs; src = dsh-src; srcRevision = dsh-src.rev or "0000000000000000000000000000000000000000"; };
       mkRuntime =
         pkgs: payload:
         pkgs.callPackage ./nix/runtime.nix {
