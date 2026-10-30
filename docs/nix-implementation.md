@@ -76,3 +76,18 @@ usable`），而 `electron_44-bin` dist 与 Gate 0 spike 一致、可正常开�
   `nix/runtime/project` 与 committed 版本 **零 diff**（确定性 tarball + lockfile 生成验证通过）。
 - `nix flake show`：packages/overlay/homeModules/devShells/checks 输出齐全；
   `nixosConfigurations.home/laptop` 的 toplevel 可求值并已预构建。
+
+## 模块独立消费验证（不依赖用户 nixos-config）
+
+用一个临时 flake（nixpkgs + home-manager + 本仓库 path input）做 standalone HM 求值/构建：
+
+- `home-manager.lib.homeManagerConfiguration` + `dsh-nix.homeModules.default` +
+  `nixpkgs.overlays = [ dsh-nix.overlays.default ]` + `cli.enable = true`，构建
+  `activationPackage` 成功；
+- 生成 `home-files/.dsh/cordis.patch.yml`、`.local/bin/dsh`、`.local/bin/dsh-desktop`、
+  `.local/share/applications/deepseek-harness.desktop`；
+- 用生成的 `dsh` wrapper 跑 `--version` = `0.2.2-alpha.2`；`--profile web --dump-config`
+  在临时 `DSH_HOME` 下显示 home patch 被接受（2 个 layer patch，permission presets 完整）。
+
+结论：公开模块 + overlay + `cli.enable` 在用户配置之外可独立工作；`nix flake check --no-build`
+（packages/devShells/formatter/checks）也通过。
