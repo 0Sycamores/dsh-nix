@@ -10,11 +10,11 @@
 - `modules/development/dsh.nix`：`sycamore.dsh.settings` 迁移到新模块，旧 CLI 的环境/持久化不动。
 - hosts `home` / `laptop` 均已 import 新模块。
 
-切换（按平时方式；`home` 与 `laptop` 都适用）：
+切换（当前运行的是 laptop 主机；home 服务器用 `.#home`）：
 
 ```sh
 cd ~/.nixos-config
-sudo nixos-rebuild switch --flake .#home   # laptop 用 .#laptop
+sudo nixos-rebuild switch --flake .#laptop   # home 用 .#home
 ```
 
 首次构建约 7–10 分钟（payload 离线构建），之后走缓存。toplevel 已预构建验证过。
@@ -27,7 +27,8 @@ sudo nixos-rebuild switch --flake .#home   # laptop 用 .#laptop
 切换后手动检查：
 
 1. **桌面入口**：应用启动器搜 "DeepSeek Harness"，或运行 `~/.local/bin/dsh-desktop`。
-   窗口标题应为 `DSH 本地构建`，Wayland `app_id=deepseek-harness`。
+   desktop entry 为 `~/.local/share/applications/deepseek-harness.desktop`，其 id 与
+   Wayland `app_id=deepseek-harness` 一致；窗口标题应为 `DSH 本地构建`。
 2. **日志**：`~/.config/DeepSeek Harness/logs/`；主进程 stdout 里应有
    `dsh web: http://127.0.0.1:<port>/?token=...`（Host 就绪）。
 3. **凭据**：sops 渲染的 `dsh_env` 由启动器 source（`SYCAMORE_API_KEY` / `DEEPSEEK_API_KEY`）；

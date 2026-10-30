@@ -4,7 +4,7 @@ DSH 桌面端（DeepSeek Harness desktop shell）的 Nix/NixOS 打包 —— **�
 
 - 基线：`dsh-v0.2.2-alpha.2`
 - 目标：NixOS / x86_64-linux / Wayland
-- 状态：Gate 0/1/2/3 代码与文档完成；等待 `nixos-rebuild switch` 后做桌面入口与交互验收（见 [docs/acceptance.md](docs/acceptance.md)）
+- 状态：Gate 0/1/2/3 代码与文档完成；切换命令与验收步骤见 [docs/acceptance.md](docs/acceptance.md)
 - 许可：MIT（见 [LICENSE](LICENSE)、[NOTICE](NOTICE)）
 
 ## 用法

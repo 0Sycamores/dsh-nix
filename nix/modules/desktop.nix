@@ -66,10 +66,7 @@ let
     exec = "${launcher} %U";
     icon = "dsh-desktop";
     terminal = false;
-    categories = [
-      "Development"
-      "Utility"
-    ];
+    categories = [ "Development" ];
     startupWMClass = "deepseek-harness";
   };
 
