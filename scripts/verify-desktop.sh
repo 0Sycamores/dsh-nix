@@ -37,6 +37,31 @@ fail() { printf 'FAIL  %s\n' "$*"; fails=$((fails + 1)); }
   && pass "desktop entry: ~/.local/share/applications/deepseek-harness.desktop" \
   || fail "missing desktop entry deepseek-harness.desktop"
 
+ENTRY="$HOME_DIR/.local/share/applications/deepseek-harness.desktop"
+if [ -f "$ENTRY" ]; then
+  EXEC=$(sed -n 's/^Exec=//p' "$ENTRY" | head -1 | awk '{print $1}')
+  if [ -n "$EXEC" ] && [ -x "$EXEC" ]; then
+    pass "desktop entry Exec 可执行: $EXEC"
+  else
+    fail "desktop entry Exec 不可执行: ${EXEC:-<empty>}"
+  fi
+  if grep -q '^Icon=dsh-desktop$' "$ENTRY"; then pass "desktop entry Icon=dsh-desktop"; else fail "desktop entry Icon 异常"; fi
+fi
+
+if [ -f "$DSH_HOME/cordis.patch.yml" ]; then
+  for id in agent-default-model permission ui-settings-general; do
+    if grep -q "id: $id" "$DSH_HOME/cordis.patch.yml"; then
+      pass "home patch 含 id: $id"
+    else
+      echo "WARN  home patch 不含 id: $id（若你的配置未声明该行则正常）"
+    fi
+  done
+fi
+
+ICON="$HOME_DIR/.nix-profile/share/icons/hicolor/512x512/apps/dsh-desktop.png"
+[ -f "$ICON" ] && pass "icon: ~/.nix-profile/share/icons/hicolor/512x512/apps/dsh-desktop.png" \
+  || fail "missing icon（home.packages 是否安装？）"
+
 if [ -f "$DSH_HOME/cordis.patch.yml" ] && [ -x "$RT" ] && [ -f "$CLI" ]; then
   tmp=$(mktemp -d)
   trap 'rm -rf "$tmp"' EXIT
