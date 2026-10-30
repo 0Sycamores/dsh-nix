@@ -1,0 +1,26 @@
+diff --git a/apps/desktop/src/main.ts b/apps/desktop/src/main.ts
+index 4770fe83bf..c509304c1b 100644
+--- a/apps/desktop/src/main.ts
++++ b/apps/desktop/src/main.ts
+@@ -202,7 +202,11 @@ interface RuntimeResources {
+ 
+ function runtimeResources(): RuntimeResources {
+   const development = !app.isPackaged
+-  const node = process.execPath
++  // Linux 桌面版用 runtime 自带的官方 Node 运行 Host：require-builtin 只认官方 Node
++  // 与白名单内的 Electron 指纹，nixpkgs 的 Electron 版本不在白名单内。
++  const node = development || process.platform !== 'linux'
++    ? process.execPath
++    : join(process.resourcesPath, 'runtime', 'primary-runtime', 'dependencies', 'node', 'bin', 'node')
+   const nodeBin = development ? join(app.getAppPath(), 'scripts', 'node-bin') : join(process.resourcesPath, 'runtime', 'bin')
+   const pnpm = (development ? process.env.DSH_DESKTOP_PNPM_ENTRY : undefined)
+     ?? (development ? join(app.getAppPath(), 'node_modules', 'pnpm', 'bin', 'pnpm.mjs')
+@@ -1172,6 +1176,8 @@ async function main(): Promise<void> {
+     // Closing hides: the page and the Host keep running, and the next show resumes the same document.
+     window.on('close', (event) => {
+       if (quitting || shellInstallerOwnsQuit || sessionEnding) return
++      // Linux has no tray to restore a hidden window, so let the close reach window-all-closed and quit.
++      if (process.platform === 'linux') return
+       event.preventDefault()
+       if (updateDialog.isOpen) { updateDialog.focus(); return }
+       const hide = (): void => {
