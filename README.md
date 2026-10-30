@@ -50,3 +50,4 @@ profile 生效，优先于 profile 层）；旧 `settings.yaml` 的键名（如 
 
 - [docs/desktop-build.md](docs/desktop-build.md)：载荷流水线、Linux 适配与 Gate 0 结论
 - [docs/nix-implementation.md](docs/nix-implementation.md)：密封离线构建结构、hash 与更新流程
+- [docs/upstream-audit.md](docs/upstream-audit.md)：上游发布形态与 Linux 适配相关的审计摘要
