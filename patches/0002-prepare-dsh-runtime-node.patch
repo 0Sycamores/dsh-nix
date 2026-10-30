@@ -1,26 +1,55 @@
 diff --git a/apps/desktop/scripts/prepare-dsh.ts b/apps/desktop/scripts/prepare-dsh.ts
-index a069888036..74498240b2 100644
+index a069888036..03cbdaeef9 100644
 --- a/apps/desktop/scripts/prepare-dsh.ts
 +++ b/apps/desktop/scripts/prepare-dsh.ts
-@@ -44,7 +44,11 @@ const STORE_ROOT = BUILD_PATHS.pnpmStore
+@@ -44,7 +44,12 @@ const STORE_ROOT = BUILD_PATHS.pnpmStore
  const RUNTIME_ROOT = BUILD_PATHS.runtime
  const PNPM_BUILD_STATE = BUILD_PATHS.dshPnpm
  const PACKAGE_SET_ROOT = BUILD_PATHS.packageSet
 -const NODE = join(BUILD_PATHS.electron, process.platform === 'win32' ? 'electron.exe' : 'Electron.app/Contents/MacOS/Electron')
 +// Linux 桌面版用 runtime 自带的官方 Node 运行 Host/冒烟：require-builtin 只认官方
 +// Node 与白名单内 Electron 指纹，nixpkgs Electron 不在白名单内。
-+const NODE = process.platform === 'linux'
-+  ? join(BUILD_PATHS.runtime, 'primary-runtime', 'dependencies', 'node', 'bin', 'node')
-+  : join(BUILD_PATHS.electron, process.platform === 'win32' ? 'electron.exe' : 'Electron.app/Contents/MacOS/Electron')
++const NODE = process.env.DSH_DESKTOP_HOST_NODE
++  ?? (process.platform === 'linux'
++    ? join(BUILD_PATHS.runtime, 'primary-runtime', 'dependencies', 'node', 'bin', 'node')
++    : join(BUILD_PATHS.electron, process.platform === 'win32' ? 'electron.exe' : 'Electron.app/Contents/MacOS/Electron'))
  const PNPM = join(RUNTIME_ROOT, 'primary-runtime', 'dependencies', 'pnpm', 'bin', 'pnpm.mjs')
  
  function manifestVersion(path: string, subject: string): string {
-@@ -86,6 +90,8 @@ function runPnpm(args: readonly string[]): Promise<void> {
+@@ -86,6 +91,9 @@ function runPnpm(args: readonly string[]): Promise<void> {
        '--config.verify-store-integrity=true',
        '--config.package-import-method=copy',
        '--config.enable-global-virtual-store=false',
 +      // 离线 Nix 构建不执行依赖安装脚本：原生依赖使用包内预构建产物。
 +      '--config.ignore-scripts=true',
++      ...(process.env.DSH_DESKTOP_PNPM_OFFLINE === '1' ? ['--offline'] : []),
        `--config.userconfig=${userConfig}`,
        command,
        ...commandArgs,
+@@ -129,7 +137,12 @@ async function main(): Promise<void> {
+       createRuntimeProjectMetadata(BUILD_ROOT, release)
+       return prepareRuntimePatches(BUILD_ROOT, resolve(APP_ROOT, '..', '..'))
+     })
+-    await packagingStep(process.env.DSH_DESKTOP_PACKAGING_RUN_DIR, 'runtime:lockfile', () => runPnpm(['install', '--lockfile-only']))
++    // 离线构建使用仓库里预生成的 lockfile；在线流程仍走 pnpm 解析。
++    const providedLockfile = process.env.DSH_DESKTOP_RUNTIME_LOCKFILE
++    await packagingStep(process.env.DSH_DESKTOP_PACKAGING_RUN_DIR, 'runtime:lockfile', () =>
++      providedLockfile === undefined || providedLockfile === ''
++        ? runPnpm(['install', '--lockfile-only'])
++        : Promise.resolve(copyFileSync(providedLockfile, join(BUILD_ROOT, 'pnpm-lock.yaml'))))
+     verifyRuntimePatches(BUILD_ROOT, patches)
+     const lockfile = readFileSync(join(BUILD_ROOT, 'pnpm-lock.yaml'), 'utf8')
+     console.log(`desktop runtime: lockfile sha256 ${createHash('sha256').update(lockfile).digest('hex')}`)
+@@ -169,7 +182,11 @@ async function main(): Promise<void> {
+       await packagingStep(process.env.DSH_DESKTOP_PACKAGING_RUN_DIR, 'sign:primary-native', () => signMacOSRuntime(join(RUNTIME_ROOT, 'primary-runtime'), resolveDesktopAppId(process.env), resolveMacOSSigningEnvironment(process.env), target.arch, cacheDirectory, 'primary'))
+     }
+     await packagingStep(process.env.DSH_DESKTOP_PACKAGING_RUN_DIR, 'runtime:manifests', () => prepareRuntimeManifests(DSH_OUTPUT_ROOT))
+-    await packagingStep(process.env.DSH_DESKTOP_PACKAGING_RUN_DIR, 'runtime:primary-smoke', async () => smokePrimaryRuntime(join(RUNTIME_ROOT, 'primary-runtime')))
++    await packagingStep(process.env.DSH_DESKTOP_PACKAGING_RUN_DIR, 'runtime:primary-smoke', async () => {
++      // 沙箱里无法执行 payload 自带的 node/python，原生冒烟交给宿主侧验收。
++      if (process.env.DSH_DESKTOP_DEFER_NATIVE_SMOKE === '1') return
++      smokePrimaryRuntime(join(RUNTIME_ROOT, 'primary-runtime'))
++    })
+     await packagingStep(process.env.DSH_DESKTOP_PACKAGING_RUN_DIR, 'runtime:write-descriptor', async () => {
+       const writeRuntime = target.platform === 'win32' ? writeDesktopRuntimeAsync : writeDesktopRuntime
+       return writeRuntime(DSH_OUTPUT_ROOT, release, packageSet.packages.map(entry => entry.name), target)

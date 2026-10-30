@@ -4,3 +4,6 @@
 /.direnv/
 node_modules/
 *.log
+
+# 更新流程工作目录（scripts/update.sh）
+/.update/
