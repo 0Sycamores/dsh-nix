@@ -56,6 +56,22 @@ let
       "$@"
   '';
 
+  # 不依赖 xdg.enable（使用者的 HM 配置可能关闭 xdg 管理）；直接生成 desktop 文件。
+  desktopItem = pkgs.makeDesktopItem {
+    name = "dsh-desktop";
+    desktopName = "DeepSeek Harness";
+    genericName = "AI Agent Workspace";
+    comment = "DeepSeek Harness 桌面端（DSH，个人自用打包）";
+    exec = "${launcher} %U";
+    icon = "dsh-desktop";
+    terminal = false;
+    categories = [
+      "Development"
+      "Utility"
+    ];
+    startupWMClass = "deepseek-harness";
+  };
+
   homeRelative = lib.removePrefix "${config.home.homeDirectory}/" cfg.dshHome;
 in
 {
@@ -126,24 +142,10 @@ in
       }
       // lib.optionalAttrs cfg.cli.enable {
         ".local/bin/dsh".source = cli;
+      }
+      // {
+        ".local/share/applications/dsh-desktop.desktop".source = desktopItem;
       };
 
-    xdg.desktopEntries.dsh-desktop = {
-      name = "DeepSeek Harness";
-      genericName = "AI Agent Workspace";
-      comment = "DeepSeek Harness 桌面端（DSH，个人自用打包）";
-      exec = "${launcher} %U";
-      icon = "dsh-desktop";
-      terminal = false;
-      categories = [
-        "Development"
-        "Utility"
-      ];
-      # HM 的 desktopEntries 选项没有 startupWMClass，用额外键写 StartupWMClass；
-      # 与 Wayland 下 Electron 报出的 app_id（deepseek-harness）一致，便于窗口匹配。
-      settings = {
-        StartupWMClass = "deepseek-harness";
-      };
-    };
   };
 }
