@@ -58,7 +58,8 @@ let
 
   # 不依赖 xdg.enable（使用者的 HM 配置可能关闭 xdg 管理）；直接生成 desktop 文件。
   desktopItem = pkgs.makeDesktopItem {
-    name = "dsh-desktop";
+    # 文件名（desktop entry id）与 Electron 的 Wayland app_id 一致，任务栏才能关联。
+    name = "deepseek-harness";
     desktopName = "DeepSeek Harness";
     genericName = "AI Agent Workspace";
     comment = "DeepSeek Harness 桌面端（DSH，个人自用打包）";
@@ -157,7 +158,7 @@ in
         ".local/bin/dsh".source = cli;
       }
       // {
-        ".local/share/applications/dsh-desktop.desktop".source = desktopItem;
+        ".local/share/applications/deepseek-harness.desktop".source = desktopItem;
       };
 
   };

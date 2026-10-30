@@ -38,6 +38,6 @@
 - overlay 仍钉死 `electron_44-bin`/`nodejs_24`/`pnpm_11` 属性：换到不含这些属性的旧/新 nixpkgs
   会 eval 失败。属预期的兼容窗口问题，文档注明目标 nixpkgs（nixpkgs-unstable @ e62746b0）。
 - `checks` 只构建桌面包，未引入 home-manager input 做模块求值检查（避免额外重量级输入）。
-- X11 与 Wayland 桌面关联（`StartupWMClass` / app_id）未分别验证；当前用 `deepseek-harness`
-  作为 `StartupWMClass` 并观察到 Wayland `app_id=deepseek-harness`。
+- X11 桌面关联未验证：已把 desktop entry 文件名改为 `deepseek-harness.desktop`、
+  `StartupWMClass`/`CHROME_DESKTOP` 统一为 `deepseek-harness`，与实测 Wayland `app_id` 一致；X11 下未测。
 - 未重跑完整 `update.sh` 的失败路径（仅验证成功路径零 diff 与静态审阅）。
