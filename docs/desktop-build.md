@@ -69,3 +69,17 @@
 - 声明式 home patch（`~/.dsh/cordis.patch.yml`）对 desktop profile 生效方式。
 - 交互验收：API Key、工作区、bash 任务、终端、Office 往返。
 - 桌面入口/图标/环境文件注入。
+
+## Gate 2：Home Manager 与声明式设置（已验证部分）
+
+- `programs.dsh-desktop` 生成 `~/.dsh/cordis.patch.yml`（home 层），`settings` 的键按 patch 行 id
+  写入，`ui-onboarding` 等旧键名按上游迁移表重映射（→ `ui-settings-general`）。
+- 用打包后的 CLI 对真实 config 做 `--profile web --dump-config` 验证：5 个 layer patch 全部
+  命中（`patched by .../cordis.patch.yml`），`permission.defaultPreset`、
+  `agent-default-model`、`llm-pi-ai`、`ui-settings-general` 的声明值出现在合成配置中，无 skipped patch。
+- `environmentFiles`（sops 渲染的 `dsh_env`）由启动器在 exec 前 source；`DSH_HOME` 固定为
+  `~/.dsh`（与终端 dsh 共享）。
+- nixos-config 已接入：`dsh-nix` input（follows nixpkgs）、overlay + `home-manager.sharedModules`、
+  `modules/development/dsh-desktop.nix`；旧 `sycamore.dsh.settings` 迁移到 `programs.dsh-desktop.settings`，
+  旧 CLI 的持久化/环境文件保持不动，`cli.enable = false` 过渡。
+- 待用户执行 `nixos-rebuild switch` 后完成：桌面入口启动、真实 `~/.dsh` 下的欢迎/设置验收。

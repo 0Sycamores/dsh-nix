@@ -60,3 +60,16 @@ usable`），而 `electron_44-bin` dist 与 Gate 0 spike 一致、可正常开�
   `--defer-runtime-smoke` 跳过；真实启动 + CLI/配置 dump 作为验收。
 - 运行期树里的 node/python 是官方预编译产物，运行依赖 NixOS 的 `nix-ld`。
 - 仅 x86_64-linux；不生成 asar。
+
+## 验证记录（本机，2026-10-31）
+
+- `nix build .#dsh-desktop`：`/nix/store/4pz1x3fcrlxlwgiz0h9l52sg3j7ylqkc-dsh-desktop-0.2.2-alpha.2`
+  （1.3G；Electron dist 与运行时树字节未改动）。
+- 启动后 niri 窗口 `app_id=deepseek-harness`、标题 `DSH 本地构建`，Host 输出
+  `dsh web: http://127.0.0.1:<port>/?token=...`；关窗后进程退出。
+- 包内 CLI（runtime Node + desktop-host `cli.js`）`--version` = `0.2.2-alpha.2`。
+- 运行期树 `desktop-runtime.json` 的 20928 个文件摘要通过上游校验；准备阶段 49s（离线）。
+- `scripts/update.sh dsh-v0.2.2-alpha.2` 在全新检出 + 独立 Nix 构建上重跑：重新生成的
+  `nix/runtime/project` 与 committed 版本 **零 diff**（确定性 tarball + lockfile 生成验证通过）。
+- `nix flake show`：packages/overlay/homeModules/devShells/checks 输出齐全；
+  `nixosConfigurations.home/laptop` 的 toplevel 可求值并已预构建。
