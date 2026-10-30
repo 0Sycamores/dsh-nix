@@ -14,9 +14,12 @@ let
   cfg = config.programs.dsh-desktop;
   yaml = pkgs.formats.yaml { };
 
-  # 旧 settings.yaml 键 → 新 patch 行 id 的重映射（与上游 settings 迁移表一致）。
+  # 旧 settings.yaml 键 → 新 patch 行 id 的重映射（上游 LEGACY_SECTION_ENTRIES；
+  # shell 段在本仓库目标平台 Linux 上映射到 bash-sandbox）。
   legacySettingsIds = {
+    "ui-developer-tools" = "ui-settings";
     "ui-onboarding" = "ui-settings-general";
+    "shell" = "bash-sandbox";
   };
 
   settingsRows = lib.mapAttrsToList (
