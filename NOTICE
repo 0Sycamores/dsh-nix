@@ -1,0 +1,11 @@
+dsh-nix — 个人自用的 DSH 桌面端 Nix 打包（非官方）
+
+本仓库的 Nix 表达式以 MIT 许可发布（见 LICENSE）。构建产物来自上游
+DeepSeek Harness（MIT，Copyright (c) 2026 DeepSeek）：
+  https://github.com/deepseek-ai/deepseek-harness
+
+构建产物同时包含第三方组件（Electron/Chromium、Node.js、Python 运行时
+与 wheels、LibreOffice WASM 等），其许可随各发行物提供。分发构建产物时
+需一并保留上游与第三方的 LICENSE/NOTICE。
+
+本项目为个人自用、非官方构建，与 DeepSeek 无隶属或背书关系。
