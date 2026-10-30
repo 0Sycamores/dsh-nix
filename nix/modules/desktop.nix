@@ -155,7 +155,8 @@ in
         ".local/bin/dsh".source = cli;
       }
       // {
-        ".local/share/applications/deepseek-harness.desktop".source = desktopItem;
+        # makeDesktopItem 的输出是目录（share/applications/...），home.file 需要指向文件本身。
+        ".local/share/applications/deepseek-harness.desktop".source = "${desktopItem}/share/applications/deepseek-harness.desktop";
       };
 
   };

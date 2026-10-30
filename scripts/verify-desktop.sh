@@ -15,6 +15,13 @@ while [ $# -gt 0 ]; do
   esac
 done
 if [ -z "$PKG" ]; then
+  # 优先用系统里实际安装的包（NixOS HM 默认装到 /etc/profiles/per-user/<user>）。
+  INSTALLED=$(command -v dsh-desktop 2>/dev/null || true)
+  if [ -n "$INSTALLED" ]; then
+    PKG=$(dirname "$(dirname "$(readlink -f "$INSTALLED")")")
+  fi
+fi
+if [ -z "$PKG" ]; then
   PKG=$(nix build "$REPO#dsh-desktop" --no-link --print-out-paths | tail -1)
 fi
 
@@ -58,9 +65,18 @@ if [ -f "$DSH_HOME/cordis.patch.yml" ]; then
   done
 fi
 
-ICON="$HOME_DIR/.nix-profile/share/icons/hicolor/512x512/apps/dsh-desktop.png"
-[ -f "$ICON" ] && pass "icon: ~/.nix-profile/share/icons/hicolor/512x512/apps/dsh-desktop.png" \
-  || fail "missing icon（home.packages 是否安装？）"
+ICON=""
+for candidate in \
+  "$PKG/share/icons/hicolor/512x512/apps/dsh-desktop.png" \
+  "$HOME_DIR/.nix-profile/share/icons/hicolor/512x512/apps/dsh-desktop.png" \
+  "/etc/profiles/per-user/${USER:-}/share/icons/hicolor/512x512/apps/dsh-desktop.png"; do
+  if [ -f "$candidate" ]; then ICON=$candidate; break; fi
+done
+if [ -n "$ICON" ]; then
+  pass "icon: $ICON"
+else
+  fail "missing icon（home.packages 是否安装？）"
+fi
 
 if [ -f "$DSH_HOME/cordis.patch.yml" ] && [ -x "$RT" ] && [ -f "$CLI" ]; then
   tmp=$(mktemp -d)
