@@ -41,3 +41,11 @@
 - X11 桌面关联未验证：已把 desktop entry 文件名改为 `deepseek-harness.desktop`、
   `StartupWMClass`/`CHROME_DESKTOP` 统一为 `deepseek-harness`，与实测 Wayland `app_id` 一致；X11 下未测。
 - 未重跑完整 `update.sh` 的失败路径（仅验证成功路径零 diff 与静态审阅）。
+
+## 切换后实测补充修复
+
+- 首次 `nixos-rebuild switch` 后验收发现 `~/.local/share/applications/deepseek-harness.desktop`
+  是指向 **目录** 的符号链接（`makeDesktopItem` 的输出是 `share/applications/...` 目录树）。
+  已改为 `source = "${desktopItem}/share/applications/deepseek-harness.desktop"` 指向文件本身。
+- 验收脚本改为优先读取系统实际安装的 `dsh-desktop`（NixOS HM 默认装到
+  `/etc/profiles/per-user/<user>`），icon 检查同时覆盖包路径与用户 profile。
