@@ -24,7 +24,16 @@ sudo nixos-rebuild switch --flake .#laptop   # home 用 .#home
 自动化部分（本仓库已验证）：`packages.dsh-desktop` 可启动、窗口与 Host 就绪、关窗退出、
 包内 CLI `--version` 正常、home patch 在 `--dump-config` 中逐层命中。
 
-切换后手动检查：
+切换后先跑自动验收（不启动 GUI、不写真实 DSH_HOME）：
+
+```sh
+bash scripts/verify-desktop.sh
+```
+
+它检查 HM 生成的 launcher/desktop entry/home patch，并用打包 CLI 确认声明式设置被 dsh
+配置层接受（`patched by ~/.dsh/cordis.patch.yml`、permission preset 进入合成配置）。
+
+然后手动检查：
 
 1. **桌面入口**：应用启动器搜 "DeepSeek Harness"，或运行 `~/.local/bin/dsh-desktop`。
    desktop entry 为 `~/.local/share/applications/deepseek-harness.desktop`，其 id 与
