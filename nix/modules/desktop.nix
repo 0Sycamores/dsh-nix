@@ -136,7 +136,11 @@ in
         "Development"
         "Utility"
       ];
-      startupWMClass = "deepseek-harness";
+      # HM 的 desktopEntries 选项没有 startupWMClass，用额外键写 StartupWMClass；
+      # 与 Wayland 下 Electron 报出的 app_id（deepseek-harness）一致，便于窗口匹配。
+      settings = {
+        StartupWMClass = "deepseek-harness";
+      };
     };
   };
 }
