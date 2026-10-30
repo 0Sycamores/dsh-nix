@@ -66,7 +66,7 @@ usable`），而 `electron_44-bin` dist 与 Gate 0 spike 一致、可正常开�
 
 ## 验证记录（本机，2026-10-31）
 
-- `nix build .#dsh-desktop`：`/nix/store/4pz1x3fcrlxlwgiz0h9l52sg3j7ylqkc-dsh-desktop-0.2.2-alpha.2`
+- `nix build .#dsh-desktop`：`/nix/store/cgjp0qj5cw7mhdmw7nkz14m0scnknmp8-dsh-desktop-0.2.2-alpha.2`
   （1.3G；Electron dist 与运行时树字节未改动）。
 - 启动后 niri 窗口 `app_id=deepseek-harness`、标题 `DSH 本地构建`，Host 输出
   `dsh web: http://127.0.0.1:<port>/?token=...`；关窗后进程退出。

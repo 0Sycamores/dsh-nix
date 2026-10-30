@@ -78,3 +78,4 @@ profile 生效，优先于 profile 层）；旧 `settings.yaml` 的键名（如 
 - [docs/nix-implementation.md](docs/nix-implementation.md)：密封离线构建结构、hash 与更新流程
 - [docs/upstream-audit.md](docs/upstream-audit.md)：上游发布形态与 Linux 适配相关的审计摘要
 - [docs/acceptance.md](docs/acceptance.md)：nixos-config 切换与切换后的验收清单
+- [docs/audit.md](docs/audit.md)：独立审计（Gate 3）的发现与处理记录
