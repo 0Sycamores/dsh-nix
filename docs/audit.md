@@ -59,3 +59,28 @@
 - `scripts/check.sh` + `.github/workflows/ci.yml` 提供本地与 CI 共用的廉价门禁；
 - `scripts/verify-desktop.sh --self-test` 用夹具回归验收脚本自身的路径/断言逻辑；
 - `AGENTS.md` 记录导航指针与不变量（IFD、pipefail、pkill 自身、host 判断等 gotchas）。
+
+## Web/CLI 阶段（2026-10-31，实现后自审）
+
+范围：`packages.dsh`、`programs.dsh` 拆分、`programs.dsh-desktop` 收敛、Web smoke 与
+nixos-config 接线。结论：无 P0；以下为设计取舍与未完成项。
+
+- **共享 runtime 是有意为之**：`packages.dsh` 只引用 `dsh-desktop-runtime`，不复制/不 fixup；
+  Web/CLI 闭包因此包含桌面侧的 Python/Office 资产。理由与替代方案见
+  [ADR 0001](adr/0001-one-runtime-three-surfaces.md)。
+- **Web 不设服务**：只手动 `dsh web`，tmux 保活；不加 systemd unit。token URL 每次启动
+  变化，旧 cookie 失效；重启不丢会话历史。运行与安全边界见 [web.md](web.md)。
+- **单一设置写入者**：`programs.dsh` 写 `$DSH_HOME/cordis.patch.yml`；`programs.dsh-desktop`
+  只读 `dshHome`/`environmentFiles`。桌面模块断言 `programs.dsh.enable = true`，避免出现
+  没有共享设置/CLI 的桌面包。
+- **旧包已退场**：`pkgs/dsh` 与 `sycamore.dsh` 已从 nixos-config 删除；回滚依赖
+  `nixos-rebuild --rollback` 的旧 generation，而不是仓库里保留第二份包。
+- **测试边界**：`checks.hm-module` 覆盖模块渲染；`checks.dsh` 构建重包但 CI 不跑；
+  `scripts/verify-web.sh` 只验证 bootstrap（303→200+`__DSH_BOOT__`），真实模型对话与
+  tailnet 访问仍由人工验收。
+- **未完成**：laptop/home 的实际切换与 home 手动 Web 验收；`nixos-config` 提交仍在本地，
+  home 需要同步同一提交后才能切换。`scripts/update.sh` 现在同时构建 `dsh` 与
+  `dsh-desktop`，但尚未跑完整更新流程。
+- **已知限制**：同一 session 不能同时在桌面与 web 打开；不同 session 可并行。Web 在
+  tailnet 内是明文 HTTP（WireGuard 加密），需要 TLS 时自行提供证书/反代并设
+  `--trusted-host`。

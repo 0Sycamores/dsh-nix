@@ -88,12 +88,12 @@ sudo nixos-rebuild switch --rollback
 ### nixos-config 接线
 
 - 删除本地自封装 `pkgs/dsh` 与 `sycamore.dsh`；终端 `dsh` 改由 `programs.dsh` 提供。
-- `modules/development/dsh.nix`：overlay + `home-manager.sharedModules`（home 用
-  `homeModules.dsh`）+ `programs.dsh.{enable,environmentFiles,settings}`；home 只 import
-  这个模块，不装桌面包。
+- `modules/development/dsh.nix`：overlay + `programs.dsh.{enable,environmentFiles,settings}`；
+  home 主机另设 `home-manager.sharedModules = [ homeModules.dsh ]`，不装桌面包。
 - `modules/development/dsh-desktop.nix`：只设 `programs.dsh-desktop.enable`，并 import
   `homeModules.default`（桌面模块内部 import 共享模块）；laptop 同时启用两者。
 - 声明式 settings 从 `programs.dsh-desktop.settings` 迁到 `programs.dsh.settings`。
+- 本地提交：`dsh-nix` `af63669`（已 push）；`nixos-config` `c20142f`（未 push）。
 
 切换：
 
@@ -138,7 +138,18 @@ sudo nixos-rebuild switch --rollback
 
 ### 验收记录
 
-- [ ] `.#dsh` 构建 + `verify-web.sh` 通过。
+实现侧（2026-10-31，本机）：
+
+- `nix build .#dsh`：`/nix/store/1s5b13ycfmcnda5ivg5hw9632ihj17b3-dsh-0.2.2-alpha.2`；
+  `bin/dsh --version` = `0.2.2-alpha.2`；闭包无 Electron。
+- `scripts/verify-web.sh`：token URL 303 → cookie 后 200，页面含 `__DSH_BOOT__`。
+- `scripts/check.sh --full`：desktop/dsh 构建、闭包断言、web smoke 全 PASS。
+- home/laptop 的 `nixosConfigurations.*.system.build.toplevel` 均已构建；home HM 生成
+  只有 `dsh`，laptop 有 `dsh` + `dsh-desktop` + desktop entry。
+
+切换侧（待执行）：
+
+- [x] `.#dsh` 构建 + `verify-web.sh` 通过。
 - [ ] laptop 切换后桌面端正常，终端 `dsh --version` = `0.2.2-alpha.2`。
 - [ ] home 切换后仅 `programs.dsh` 生效，手动 Web 可从 laptop 访问。
 - [ ] tailnet 之外不可达；无公网 bind/nginx vhost。

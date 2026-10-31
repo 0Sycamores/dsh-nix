@@ -117,9 +117,11 @@ cp "$REPO/nix/gen-runtime-lock.ts" "$WORK/upstream/.dsh-nix-gen-runtime-lock.ts"
 log "5/7 刷新 runtime 依赖 hash"
 refresh_hash "$REPO/nix/runtime.nix" runtimeDepsHash .#dsh-desktop-runtime
 
-log "6/7 离线重建桌面包"
+log "6/7 离线重建桌面/CLI 包"
 DESKTOP=$(NIX_NPM_REGISTRY=$REGISTRY nix build .#dsh-desktop --no-link --print-out-paths | tail -1)
 echo "desktop: $DESKTOP"
+DSH=$(NIX_NPM_REGISTRY=$REGISTRY nix build .#dsh --no-link --print-out-paths | tail -1)
+echo "dsh: $DSH"
 
 log "7/7 检查改动并输出结果"
 ALLOWED='^(flake\.nix|flake\.lock|nix/payload\.nix|nix/runtime\.nix|nix/runtime/project/)'
@@ -133,4 +135,5 @@ trap - EXIT
 echo "tag:       $TAG"
 echo "payload:   $PAYLOAD"
 echo "desktop:   $DESKTOP"
+echo "dsh:       $DSH"
 git -C "$REPO" status --short

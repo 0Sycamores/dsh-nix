@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # 廉价质量门：脚本可执行位 / shellcheck / nixfmt / flake eval / 轻量 checks /
-# verify 脚本自测。不构建 1.3G 的桌面端（那一步留给发布或手动 nix build）。
+# verify 脚本自测。默认不构建 1.3G 的运行时/桌面端。
 #
-# 用法：bash scripts/check.sh [--full]   # --full 额外构建 dsh-desktop
+# 用法：bash scripts/check.sh [--full]   # --full 额外构建 dsh + dsh-desktop 并跑 web smoke
 set -uo pipefail
 
 REPO=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
