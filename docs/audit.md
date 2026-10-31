@@ -37,7 +37,6 @@
 
 - overlay 仍钉死 `electron_44-bin`/`nodejs_24`/`pnpm_11` 属性：换到不含这些属性的旧/新 nixpkgs
   会 eval 失败。属预期的兼容窗口问题，文档注明目标 nixpkgs（nixpkgs-unstable @ e62746b0）。
-- `checks` 只构建桌面包，未引入 home-manager input 做模块求值检查（避免额外重量级输入）。
 - X11 桌面关联未验证：已把 desktop entry 文件名改为 `deepseek-harness.desktop`、
   `StartupWMClass`/`CHROME_DESKTOP` 统一为 `deepseek-harness`，与实测 Wayland `app_id` 一致；X11 下未测。
 - 未重跑完整 `update.sh` 的失败路径（仅验证成功路径零 diff 与静态审阅）。
@@ -85,7 +84,6 @@ nixos-config 接线。结论：无 P0；以下为设计取舍与未完成项。
 - **已知限制**：同一 session 不能同时在桌面与 web 打开；不同 session 可并行。Web 在
   tailnet 内是明文 HTTP（WireGuard 加密），需要 TLS 时自行提供证书/反代并设
   `--trusted-host`。
-- **声明式 welcome 版本会挡住 Web**：home patch 的 `ui-settings-general.welcomeNoticeVersion`
-  必须等于当前 `WELCOME_NOTICE_VERSION`（0.2.2-alpha.2 为 `2026-09-28.1`）；写旧值会让
-  预览版说明重新出现，且 home 层优先级高于 UI 写入，点 Continue 只会报“暂时无法保存
-  确认状态”。改声明值或删掉该行，然后重启 Web/重新 switch。
+- **welcome 确认状态不能声明**：home 层优先级高于 UI 写入，声明
+  `ui-settings-general.welcomeNoticeVersion`（或旧键 `ui-onboarding`）会挡住 Continue 的
+  持久化；**不要声明**，让 UI 自己保存。`programs.dsh` 已加断言拒绝这种行。

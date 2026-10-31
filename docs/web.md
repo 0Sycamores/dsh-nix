@@ -11,6 +11,12 @@ DSH 的浏览器界面由 `web` profile 提供。本仓库**不安装 systemd �
 tmux new -As dsh-web 'dsh web --no-open --host "$(tailscale ip -4)" --port 3080'
 ```
 
+前台验收时也可以直接用仓库的 helper（URL 不会被 tmux 折行）：
+
+```sh
+bash scripts/serve-web.sh --host "$(tailscale ip -4)" --port 3080
+```
+
 - `--host` 只接受本机一个具体 IPv4/IPv6 地址，**不接受** `0.0.0.0` / `::`。
 - 用 tailnet IP 时，laptop、手机等 tailnet 成员可直接访问；不经过 nginx、不占公网端口。
 - 只想在 laptop 本地浏览器用：省略 `--host`（默认 `127.0.0.1`）。
@@ -84,4 +90,4 @@ bash scripts/verify-web.sh --package /nix/store/…-dsh-0.2.2-alpha.2
 | 浏览器 403 / Host rejected | 用 bind IP 访问；若必须用域名，加 `--trusted-host <authority>` |
 | 找不到 token URL | `tmux attach -t dsh-web`；不要从旧日志里复用已失效的 URL |
 | tailnet 打不开 | `tailscale status` 确认两端在线；`--host` 必须是本机 tailnet 地址 |
-| 预览版说明点「继续」报“暂时无法保存确认状态” | home patch 里的 `ui-settings-general.welcomeNoticeVersion` 与当前 `WELCOME_NOTICE_VERSION` 不一致（0.2.2-alpha.2 是 `2026-09-28.1`）；home 层优先级高于 UI 写入，必须把声明值改成当前版本，或删掉这一行让 UI 自行持久化。改完重启 Web（或重新 switch 生成 patch） |
+| 预览版说明点「继续」报“暂时无法保存确认状态” | home patch 不要声明 `ui-settings-general.welcomeNoticeVersion`（或旧键 `ui-onboarding`）：home 层优先级高于 UI 写入，任何声明都会挡住确认状态保存。删掉该行，重启 Web，让 UI 自己持久化；`programs.dsh` 现在会直接断言拒绝这种声明 |

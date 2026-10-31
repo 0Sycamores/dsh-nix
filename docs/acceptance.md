@@ -1,87 +1,9 @@
-# 切换与验收清单（Gate 2 人工部分）
+# 验收与切换（当前）
 
-> 桌面阶段验收记录：2026-10-31，`laptop` 主机 `nixos-rebuild switch --flake .#laptop` 后
-> `scripts/verify-desktop.sh` **全部 PASS**；桌面端已从应用启动器正常启动并日常使用
-> （窗口 `app_id=deepseek-harness`、Host 就绪、home patch 5 层生效）。
->
-> **Web/CLI 阶段（2026-10-31）已删除旧 `pkgs/dsh`**：终端 `dsh` 现由
-> `programs.dsh` + 新 `packages.dsh` 提供；下面的 1–8 是桌面阶段的历史记录，其中
-> “旧 CLI 不受影响”已不再适用。Web 阶段验收见文末。
-
-## nixos-config 接线（已提交到本地仓库，未推送）
-
-改动：
-
-- `flake.nix`：新增 input `dsh-nix`（`follows nixpkgs`）。
-- `modules/development/dsh-desktop.nix`：overlay + `home-manager.sharedModules` +
-  `programs.dsh-desktop`（sops 环境文件、声明式 settings）。
-- `modules/development/dsh.nix`：`sycamore.dsh.settings` 迁移到新模块，旧 CLI 的环境/持久化不动。
-- hosts `home` / `laptop` 均已 import 新模块。
-
-切换（当前运行的是 laptop 主机；home 服务器用 `.#home`）：
-
-```sh
-cd ~/.nixos-config
-sudo nixos-rebuild switch --flake .#laptop   # home 用 .#home
-```
-
-首次构建约 7–10 分钟（payload 离线构建），之后走缓存。toplevel 已预构建验证过。
-
-## 切换后验收
-
-自动化部分（本仓库已验证）：`packages.dsh-desktop` 可启动、窗口与 Host 就绪、关窗退出、
-包内 CLI `--version` 正常、home patch 在 `--dump-config` 中逐层命中。
-
-切换后先跑自动验收（不启动 GUI、不写真实 DSH_HOME）：
-
-```sh
-bash scripts/verify-desktop.sh
-```
-
-它检查 HM 生成的 launcher/desktop entry/home patch，并用打包 CLI 确认声明式设置被 dsh
-配置层接受（`patched by ~/.dsh/cordis.patch.yml`、permission preset 进入合成配置）。
-
-然后手动检查：
-
-1. **桌面入口**：应用启动器搜 "DeepSeek Harness"，或运行 `~/.local/bin/dsh-desktop`。
-   desktop entry 为 `~/.local/share/applications/deepseek-harness.desktop`，其 id 与
-   Wayland `app_id=deepseek-harness` 一致；窗口标题应为 `DSH 本地构建`。
-2. **日志**：`~/.config/DeepSeek Harness/logs/`；主进程 stdout 里应有
-   `dsh web: http://127.0.0.1:<port>/?token=...`（Host 就绪）。
-3. **凭据**：sops 渲染的 `dsh_env` 由启动器 source（`SYCAMORE_API_KEY` / `DEEPSEEK_API_KEY`）；
-   欢迎页"开始设置"里确认模型路由可用。
-4. **任务**：新建/选择工作区 → 发一条消息 → 确认 bash 工具能执行并回传。
-5. **终端面板**：打开终端，`pwd` / `ls` 正常。
-6. **Office**：生成或打开一个表格/csv，确认读写往返。
-7. **声明式设置**：`cat ~/.dsh/cordis.patch.yml` 应含
-   `agent-default-model`、`permission`、`llm-pi-ai`、`ui-settings-general` 等行；
-   用包内 CLI 复核：
-
-   ```sh
-   RT=~/.nix-profile/share/dsh-desktop/node/bin/node  # 以实际包路径为准
-   # 或：nix shell github:0Sycamores/dsh-nix -c dsh-desktop --version
-   ```
-
-   最可靠的是 `nix eval` 后的 store 路径：
-   `${dsh-desktop}/lib/dsh-desktop/resources/runtime/primary-runtime/dependencies/node/bin/node`
-   加 `resources/app/dsh/node_modules/@deepseek-ai/dsh-desktop-host/lib/cli.js`，
-   `--profile web --dump-config` 检查 `patched by ~/.dsh/cordis.patch.yml`。
-8. **旧 CLI 不受影响**：`dsh --version` 仍是 `0.2.2-alpha.2`（旧 pkgs/dsh 提供，`cli.enable=false`）。
-
-## 回滚
-
-```sh
-sudo nixos-rebuild switch --rollback
-```
-
-或 revert nixos-config 的接线提交；`~/.dsh` 数据与旧 CLI 均不受影响。
-
-## 已知限制（验收时可接受）
-
-- 无托盘、无自动更新、无开机自启；关窗即退出（Linux 适配）。
-- Host/CLI 跑 runtime 自带官方 Node，依赖系统 `nix-ld`（已启用）。
-- 上游 release smoke 在构建中跳过，真实启动与上述手动项替代。
-- 仅 x86_64-linux / Wayland 验证；X11 未验证。
+桌面阶段的历史记录在
+[docs/history/2026-10-31-desktop-acceptance.md](history/2026-10-31-desktop-acceptance.md)。
+当前阶段是 Web/CLI；桌面仍用 `scripts/verify-desktop.sh`，Web 用
+`scripts/verify-web.sh` 或 `scripts/serve-web.sh`。
 
 ## Web/CLI 阶段（2026-10-31）
 
@@ -93,7 +15,7 @@ sudo nixos-rebuild switch --rollback
 - `modules/development/dsh-desktop.nix`：只设 `programs.dsh-desktop.enable`，并 import
   `homeModules.default`（桌面模块内部 import 共享模块）；laptop 同时启用两者。
 - 声明式 settings 从 `programs.dsh-desktop.settings` 迁到 `programs.dsh.settings`。
-- 本地提交：`dsh-nix` `af63669`（已 push）；`nixos-config` `c20142f`（未 push）。
+- 本地提交：`dsh-nix` 已 push；`nixos-config` 当前 `aeb1657`（未 push）。
 
 切换：
 
@@ -167,18 +89,20 @@ sudo nixos-rebuild switch --rollback
   已是 `4ji19qaq…-dsh-desktop-0.2.2-alpha.2`，`verify-desktop.sh` 再次 ALL PASSED。
 - [x] laptop tailnet Web surface：手动起在 `100.64.0.3:3080`，token 303 → cookie 200，
   `__DSH_BOOT__` 存在；浏览器内的真实对话验收见下一条。
-- [x] 预览版说明无法继续（已修复）：home patch 的
-  `ui-settings-general.welcomeNoticeVersion` 还是 `2026-08-13.1`，而 0.2.2-alpha.2 的
-  `WELCOME_NOTICE_VERSION` 是 `2026-09-28.1`；home 层优先级高于 UI 写入，所以
-  Continue 报“暂时无法保存确认状态”。已在 nixos-config `7ab0e6a` 把声明值更新为当前版本，
-  构建出新的 HM patch，并临时把 `~/.dsh/cordis.patch.yml` 指向它后重启 Web；模态框消失，
-  输入框可用。下次 `nixos-rebuild switch` 会永久生效。
+- [x] 预览版说明无法继续（已修复，方案改为不声明）：home patch 曾固定
+  `ui-settings-general.welcomeNoticeVersion = 2026-08-13.1`，而运行时要求
+  `2026-09-28.1`；home 层优先级高于 UI 写入，Continue 报“暂时无法保存确认状态”。
+  nixos-config `aeb1657` 删除该声明，并让 `programs.dsh` 断言禁止再声明
+  `ui-onboarding` / `welcomeNoticeVersion`；确认状态改由 UI 自己持久化。删除后的
+  HM patch 已构建确认不含该行；下次 switch 后首次会看到一次说明，点 Continue 即可。
+  临时用当前版本 patch 的浏览器对话已验收（见下一条），但“无声明 + UI 持久化”还需
+  在下次 switch 后点一次 Continue 复核。
 - [x] laptop Web 浏览器对话：用户在新标签页发送 `pwd`；Host 调用 bash 工具，返回
   `/home/sycamore/Projects/dsh-nix`，assistant 复述该路径并完成 turn（session
   `f85071c5…`，2026-10-31 14:31）。测试用 Web surface 已停止（3080 关闭）。
 - [ ] home 切换与手动 Web：用户明确「home 先不着急」，本轮暂缓（不算失败）。home 当前仍是旧
   generation（`df24z8…`，2026-09-29），`nixos-config` checkout 在 `04da93b`。
-  laptop 主分支已合并 home 的本机提交并包含 pki 修复（当前 `7ab0e6a`），只差
+  laptop 主分支已合并 home 的本机提交并包含 pki 修复与 welcome 删除（当前 `aeb1657`），只差
   `git push origin main`；home 需要 `git pull --ff-only` 后由用户执行
   `sudo nixos-rebuild switch --flake .#home`（sudo 需要密码）。
 - home 构建曾遇到一个与本仓库无关的 `nss-cacert` 失败：home 的
@@ -186,7 +110,7 @@ sudo nixos-rebuild switch --rollback
   `emSign ECC Root CA - G3` 写进 `security.pki.caCertificateBlacklist`，导致
   `buildcatrust` 报 “blocklist 中的证书不存在”。已在 `merge-home` 的 `4bcd859`
   移除该条；修复后 home 与 laptop 的 `system.build.toplevel` **均构建成功**。
-  合并/切换命令（laptop 的 `main` 已包含 `4bcd859` 与 `7ab0e6a`，只需推送）：
+  合并/切换命令（laptop 的 `main` 已包含 `4bcd859`、`7ab0e6a` 与 `aeb1657`，只需推送）：
 
   ```sh
   # laptop

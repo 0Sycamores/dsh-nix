@@ -51,6 +51,15 @@ section "nixfmt"
 mapfile -t nixfiles < <(find "$REPO" -name '*.nix' -not -path '*/.update/*' -type f | sort)
 check nixfmt nixfmt --check "${nixfiles[@]}"
 
+section "flake tracked files"
+untracked=$(git -C "$REPO" ls-files --others --exclude-standard -- '*.nix' flake.nix)
+if [ -n "$untracked" ]; then
+  printf 'FAIL  untracked Nix files are invisible to flake path input; git add first:\n%s\n' "$untracked"
+  fail=$((fail + 1))
+else
+  printf 'ok    all Nix files are tracked\n'
+fi
+
 section "flake eval"
 check "nix flake check --no-build" nix flake check --no-build "$REPO"
 

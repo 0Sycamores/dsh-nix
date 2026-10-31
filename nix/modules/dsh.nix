@@ -33,6 +33,29 @@ let
   }) cfg.settings;
   patchRows = settingsRows ++ cfg.patches;
 
+  # welcomeNoticeVersion 由 UI 自己持久化；声明在 home 层会覆盖 UI 的写入，
+  # 且上游一改 WELCOME_NOTICE_VERSION 就会卡在“暂时无法保存确认状态”。
+  welcomePinned =
+    cfg.settings ? "ui-onboarding"
+    || (
+      let
+        section = cfg.settings."ui-settings-general" or null;
+      in
+      lib.isAttrs section && section ? welcomeNoticeVersion
+    )
+    || lib.any (
+      row:
+      lib.isAttrs row
+      && (
+        (row.id or null) == "ui-onboarding"
+        || (
+          (row.id or null) == "ui-settings-general"
+          && lib.isAttrs (row.config or null)
+          && (row.config ? welcomeNoticeVersion)
+        )
+      )
+    ) cfg.patches;
+
   environmentSource = lib.concatMapStringsSep "\n" (file: ''
     if [ -r ${lib.escapeShellArg file} ]; then
       . ${lib.escapeShellArg file}
@@ -76,6 +99,9 @@ in
 
         注意：上游 patch 语义是**整行替换**该 id 的 config，不是深合并。每行必须写全
         需要的键（例如 permission 行要连同 presets 一起写），否则该行原有键会被清掉。
+
+        不要声明 `ui-onboarding` 或 `ui-settings-general.welcomeNoticeVersion`：预览版
+        说明的确认状态由 UI 自己持久化，home 层声明会覆盖 UI 写入并导致 Continue 失败。
       '';
     };
 
@@ -95,6 +121,10 @@ in
           && !(lib.elem ".." (lib.splitString "/" cfg.dshHome))
           && !(lib.hasSuffix "/" cfg.dshHome);
         message = "programs.dsh.dshHome 必须是家目录内、不等于家目录、不含 .. 且无尾斜杠的绝对路径。";
+      }
+      {
+        assertion = !welcomePinned;
+        message = "programs.dsh.settings/patches 不要声明 ui-onboarding 或 ui-settings-general.welcomeNoticeVersion：该确认状态必须由 UI 持久化，home 层声明会覆盖写入并导致“暂时无法保存确认状态”。";
       }
       {
         assertion =

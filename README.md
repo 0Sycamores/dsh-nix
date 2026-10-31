@@ -127,7 +127,8 @@ bash scripts/check.sh --full    # 额外构建 dsh + dsh-desktop，并跑 verify
 - [docs/desktop-build.md](docs/desktop-build.md)：载荷流水线、Linux 适配与 Gate 0 结论
 - [docs/nix-implementation.md](docs/nix-implementation.md)：密封离线构建、共享 runtime 与更新流程
 - [docs/upstream-audit.md](docs/upstream-audit.md)：上游发布形态与 Linux 适配相关的审计摘要
-- [docs/acceptance.md](docs/acceptance.md)：nixos-config 切换与验收清单
+- [docs/acceptance.md](docs/acceptance.md)：当前 Web/CLI 切换与验收清单
+- [docs/history/](docs/history/)：已完成的桌面阶段验收记录
 - [docs/audit.md](docs/audit.md)：独立审计与已知限制
 - [GLOSSARY.md](GLOSSARY.md)：surface / profile / payload / runtime 等术语
 - [docs/adr/](docs/adr/)：架构决策记录
