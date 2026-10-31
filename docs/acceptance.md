@@ -15,7 +15,7 @@
 - `modules/development/dsh-desktop.nix`：只设 `programs.dsh-desktop.enable`，并 import
   `homeModules.default`（桌面模块内部 import 共享模块）；laptop 同时启用两者。
 - 声明式 settings 从 `programs.dsh-desktop.settings` 迁到 `programs.dsh.settings`。
-- 本地提交：`dsh-nix` 已 push；`nixos-config` 当前 `aeb1657`（未 push）。
+- 本地提交：`dsh-nix` 已 push；`nixos-config` 当前 `aeb1657` + lock `e9c9f55`（未 push）。
 
 切换：
 
@@ -102,7 +102,7 @@ sudo nixos-rebuild switch --rollback
   `f85071c5…`，2026-10-31 14:31）。测试用 Web surface 已停止（3080 关闭）。
 - [ ] home 切换与手动 Web：用户明确「home 先不着急」，本轮暂缓（不算失败）。home 当前仍是旧
   generation（`df24z8…`，2026-09-29），`nixos-config` checkout 在 `04da93b`。
-  laptop 主分支已合并 home 的本机提交并包含 pki 修复与 welcome 删除（当前 `aeb1657`），只差
+  laptop 主分支已合并 home 的本机提交并包含 pki 修复与 welcome 删除（当前 `aeb1657`/`e9c9f55`），只差
   `git push origin main`；home 需要 `git pull --ff-only` 后由用户执行
   `sudo nixos-rebuild switch --flake .#home`（sudo 需要密码）。
 - home 构建曾遇到一个与本仓库无关的 `nss-cacert` 失败：home 的
@@ -110,7 +110,7 @@ sudo nixos-rebuild switch --rollback
   `emSign ECC Root CA - G3` 写进 `security.pki.caCertificateBlacklist`，导致
   `buildcatrust` 报 “blocklist 中的证书不存在”。已在 `merge-home` 的 `4bcd859`
   移除该条；修复后 home 与 laptop 的 `system.build.toplevel` **均构建成功**。
-  合并/切换命令（laptop 的 `main` 已包含 `4bcd859`、`7ab0e6a` 与 `aeb1657`，只需推送）：
+  合并/切换命令（laptop 的 `main` 已包含 `4bcd859`、`7ab0e6a`、`aeb1657` 与 `e9c9f55`，只需推送）：
 
   ```sh
   # laptop
