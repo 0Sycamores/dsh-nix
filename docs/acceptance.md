@@ -173,8 +173,10 @@ sudo nixos-rebuild switch --rollback
   Continue 报“暂时无法保存确认状态”。已在 nixos-config `7ab0e6a` 把声明值更新为当前版本，
   构建出新的 HM patch，并临时把 `~/.dsh/cordis.patch.yml` 指向它后重启 Web；模态框消失，
   输入框可用。下次 `nixos-rebuild switch` 会永久生效。
-- [ ] laptop Web 浏览器对话：用户打开 token URL 并完成一次模型/bash 往返（进行中）。
-- [ ] home 切换与手动 Web：用户明确「home 先不着急」，暂缓。home 当前仍是旧
+- [x] laptop Web 浏览器对话：用户在新标签页发送 `pwd`；Host 调用 bash 工具，返回
+  `/home/sycamore/Projects/dsh-nix`，assistant 复述该路径并完成 turn（session
+  `f85071c5…`，2026-10-31 14:31）。测试用 Web surface 已停止（3080 关闭）。
+- [ ] home 切换与手动 Web：用户明确「home 先不着急」，本轮暂缓（不算失败）。home 当前仍是旧
   generation（`df24z8…`，2026-09-29），`nixos-config` checkout 在 `04da93b`。
   laptop 主分支已合并 home 的本机提交并包含 pki 修复（当前 `7ab0e6a`），只差
   `git push origin main`；home 需要 `git pull --ff-only` 后由用户执行

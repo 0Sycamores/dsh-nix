@@ -5,8 +5,8 @@ DSH（DeepSeek Harness）的 Linux/NixOS 打包 —— **个人自用、非官�
 
 - 基线：`dsh-v0.2.2-alpha.2`
 - 目标：NixOS / x86_64-linux / Wayland
-- 状态：桌面端 Gate 0/1/2/3 已在 `laptop` 验收；CLI/Web 包与 Home Manager 模块已实现，
-  home 手动 Web 验收见 [docs/acceptance.md](docs/acceptance.md)
+- 状态：桌面端 Gate 0/1/2/3 与 laptop 上的 tailnet Web 已完成验收；home 的 Web 部署
+  按用户要求暂缓（见 [docs/acceptance.md](docs/acceptance.md)）
 - 许可：MIT（见 [LICENSE](LICENSE)、[NOTICE](NOTICE)）
 
 ## 两个包

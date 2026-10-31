@@ -78,9 +78,10 @@ nixos-config 接线。结论：无 P0；以下为设计取舍与未完成项。
 - **测试边界**：`checks.hm-module` 覆盖模块渲染；`checks.dsh` 构建重包但 CI 不跑；
   `scripts/verify-web.sh` 只验证 bootstrap（303→200+`__DSH_BOOT__`），真实模型对话与
   tailnet 访问仍由人工验收。
-- **未完成**：laptop 已切换并完成自动验收；laptop Web 的真实浏览器对话仍待用户发送消息。
-  home 按用户要求暂缓，`nixos-config` 提交仍在本地，home 需要同步后才能切换。
-  `scripts/update.sh` 现在同时构建 `dsh` 与 `dsh-desktop`，但尚未跑完整更新流程。
+- **未完成**：laptop 已切换；laptop Web 的真实浏览器对话已完成（`pwd` → bash →
+  `/home/sycamore/Projects/dsh-nix`）。home 按用户要求暂缓，`nixos-config` 提交仍在本地，
+  home 需要同步后才能切换。`scripts/update.sh` 现在同时构建 `dsh` 与 `dsh-desktop`，
+  但尚未跑完整更新流程。
 - **已知限制**：同一 session 不能同时在桌面与 web 打开；不同 session 可并行。Web 在
   tailnet 内是明文 HTTP（WireGuard 加密），需要 TLS 时自行提供证书/反代并设
   `--trusted-host`。
