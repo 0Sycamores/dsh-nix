@@ -125,3 +125,21 @@ sudo nixos-rebuild switch --rollback
   cd ~/.nixos-config && git pull --ff-only
   sudo nixos-rebuild switch --flake .#home
   ```
+
+## 最终切换复核（2026-10-31 15:57）
+
+- `/run/current-system` = `z1h7c8nnc689493mn28ki640j3w21ybd-nixos-system-laptop-…`；
+  `dsh` wrapper 指向当前 generation 的 HM profile，`dsh --version` = `0.2.2-alpha.2`。
+- `~/.dsh/cordis.patch.yml` 已归一到当前 generation（`051cpp…-home-manager-files`），
+  **不含** `welcomeNoticeVersion`。
+- `scripts/verify-desktop.sh`：ALL CHECKS PASSED；`home patch 被接受（4 个 layer patch）`。
+  `ui-settings-general` 的 WARN 是预期的——该行已不再声明。
+- `scripts/verify-web.sh`：token 303 → cookie 200，`__DSH_BOOT__` 存在。
+- 用 `scripts/serve-web.sh` 在 `100.64.0.3:3080` 起了真实 Web，浏览器加载出已有
+  `pwd` 会话，输入框可用；session 视图没有欢迎页模态框。
+- 仍未重测的是 **hero/新会话首次的欢迎页 Continue**：用户级
+  `~/.dsh/profiles/web/cordis.patch.yml` 里还留着旧值 `welcomeNoticeVersion:
+  2026-08-13.1`（不是 HM 管理，属于 profile 用户层）。home 层已不再覆盖；如果
+  hero 再次出现说明，点一次 Continue 应写入该 profile 文件。若仍失败，再清掉这一行。
+- 桌面进程仍是 `4ji19qaq…-dsh-desktop-0.2.2-alpha.2`（本次 switch 未改变桌面包）。
+- home 仍按用户要求暂缓，未切换。
