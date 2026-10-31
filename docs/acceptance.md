@@ -171,13 +171,23 @@ sudo nixos-rebuild switch --rollback
   旧 `cpv5…-home-manager-path`（`dsh --version` = `0.2.0-rc.2`）。laptop 分支
   （`9f888eb` 之后）与 home 的 `04da93b`（udev/EDL 等本机提交）已分叉，不能直接
   `git pull`；已用临时 clone 做合并预演（`GIT_LFS_SKIP_SMUDGE=1`），两边历史
-  **自动合并无冲突**。需要用户按预演结果合并后再 switch。
+  **自动合并无冲突**。合并结果已在本地分支 `merge-home` 准备好（merge commit
+  `0465d37`），等待用户合并/推送后再 switch。
   home 的 sudo 需要密码，切换必须由用户在 home 上执行。
-- [ ] home 构建还遇到一个与本仓库无关的 nixpkgs 问题：在合并分支上
-  `nixosConfigurations.home.system.build.toplevel` 会从源码构建
-  `nss-cacert-3.131.1`，失败信息为
-  `Certs in blocklist but not in cert store: {'emSign ECC Root CA - G3'}`。
-  该包在当前 nixpkgs 锁（`e62746b`）下 blocklist 与 certdata 不一致；需要更新/固定
-  nixpkgs 或临时覆盖 `nss-cacert` 后才能完成 home switch。
-  合并预演已建成本地分支 `merge-home`（merge commit `0465d37`），尚未 push；
-  laptop 的 home eval 通过。
+- home 构建曾遇到一个与本仓库无关的 `nss-cacert` 失败：home 的
+  `modules/core/pki.nix` 把 NSS 3.131.1 已从 certdata 移除的
+  `emSign ECC Root CA - G3` 写进 `security.pki.caCertificateBlacklist`，导致
+  `buildcatrust` 报 “blocklist 中的证书不存在”。已在 `merge-home` 的 `4bcd859`
+  移除该条；修复后 home 与 laptop 的 `system.build.toplevel` **均构建成功**。
+  合并/切换命令：
+
+  ```sh
+  # laptop
+  cd ~/.nixos-config
+  git checkout main && git merge --ff-only merge-home
+  git push origin main
+
+  # home（用户执行）
+  cd ~/.nixos-config && git pull --ff-only
+  sudo nixos-rebuild switch --flake .#home
+  ```
