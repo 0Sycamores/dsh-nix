@@ -143,6 +143,12 @@ sudo nixos-rebuild switch --rollback
 - `nix build .#dsh`：`/nix/store/1s5b13ycfmcnda5ivg5hw9632ihj17b3-dsh-0.2.2-alpha.2`；
   `bin/dsh --version` = `0.2.2-alpha.2`；闭包无 Electron。
 - `scripts/verify-web.sh`：token URL 303 → cookie 后 200，页面含 `__DSH_BOOT__`。
+- 非 loopback 绑定预演（laptop 的 tailnet IP `100.64.0.3`）：`--host 100.64.0.3` 正常监听，
+  打印的 URL 用该 IP，token 303 / cookie 200，页面含 boot manifest；同时出现上游的
+  “plain HTTP; restrict this port” 警告（预期）。
+- 用真实 `~/.dsh/cordis.patch.yml` 的临时副本跑 `--profile web --dump-config`：5 个 layer
+  patch 命中，`permission`/`agent-default-model`/`agent-preset-registry`/`llm-pi-ai`/
+  `ui-settings-general` 均在合成配置里，`danger-full-access` 生效。
 - `scripts/check.sh --full`：desktop/dsh 构建、闭包断言、web smoke 全 PASS。
 - home/laptop 的 `nixosConfigurations.*.system.build.toplevel` 均已构建；home HM 生成
   只有 `dsh`，laptop 有 `dsh` + `dsh-desktop` + desktop entry。
