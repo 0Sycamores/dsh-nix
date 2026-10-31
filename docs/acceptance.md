@@ -153,9 +153,18 @@ sudo nixos-rebuild switch --rollback
 - home/laptop 的 `nixosConfigurations.*.system.build.toplevel` 均已构建；home HM 生成
   只有 `dsh`，laptop 有 `dsh` + `dsh-desktop` + desktop entry。
 
-切换侧（待执行）：
+切换侧（2026-10-31 13:55，laptop 已完成）：
 
-- [x] `.#dsh` 构建 + `verify-web.sh` 通过。
-- [ ] laptop 切换后桌面端正常，终端 `dsh --version` = `0.2.2-alpha.2`。
-- [ ] home 切换后仅 `programs.dsh` 生效，手动 Web 可从 laptop 访问。
-- [ ] tailnet 之外不可达；无公网 bind/nginx vhost。
+- [x] laptop 切换完成：`/run/current-system` =
+  `maxih9gjnrnill9wqijwfi111hzxxdl9-nixos-system-laptop-…`；
+  `/etc/profiles/per-user/sycamore/bin/dsh` → `lz66ps3f6smpyxiay9pvl1f0z4lh75hb-dsh/bin/dsh`，
+  `dsh --version` = `0.2.2-alpha.2`。
+- [x] `scripts/verify-desktop.sh` **ALL CHECKS PASSED**：新桌面包
+  `4ji19qaq6a6spbdd88q54jqb152b4qjh-dsh-desktop-0.2.2-alpha.2` 的 launcher/entry/icon/
+  home patch 均正确；home patch 5 个 layer 命中，`danger-full-access` 生效。
+- [x] `scripts/verify-web.sh`：token URL 303 → cookie 200，`__DSH_BOOT__` 存在。
+- [ ] 新桌面包实际开窗：当前运行中的 Electron 仍是切换前的
+  `631z4mmdp50cli1fr9pv5ndk753ivlbi-dsh-desktop`（它同时承载本会话的 Web GUI，
+  不能在会话内重启）；需要用户关闭并重新打开桌面端一次。
+- [ ] home 切换与手动 Web：home 当前仍是旧 generation（`df24z8…`，2026-09-29），
+  `nixos-config` checkout 在 `04da93b`；需要先同步 `c20142f` 再 switch。
