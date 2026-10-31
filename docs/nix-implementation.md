@@ -142,6 +142,8 @@ usable`），而 `electron_44-bin` dist 与 Gate 0 spike 一致、可正常开�
 - `checks.hm-module`：用 dummy package 构建 standalone Home Manager 配置，断言
   `programs.dsh` 生成 home patch、`dsh` wrapper 注入环境、desktop entry 是普通文件
   （本次真实 bug 的回归）、launcher 指向；不构建 1.3G 运行时。
+- `checks.hm-module-negative`：用 `builtins.tryEval` 断言带 `ui-onboarding`/`welcomeNoticeVersion`
+  的配置必须 eval 失败（带正向 control，防止误报）。
 - `checks.scripts`：shellcheck + `bash -n` + `nixfmt --check`。
 - `checks.runtime-lockfile`：lockfile 无 registry URL；`patchedDependencies` 与
   `nix/runtime/project/patches/*.patch` 的 sha256 一致。

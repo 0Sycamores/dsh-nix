@@ -118,7 +118,8 @@ bash scripts/check.sh --full    # 额外构建 dsh + dsh-desktop，并跑 verify
 只跑廉价门禁。
 
 `checks` 里的 `hm-module` 用 dummy 包渲染 Home Manager 输出（含 desktop entry 必须是普通文件
-的回归检查），`dsh`/`dsh-desktop` 构建重包，`runtime-lockfile` 校验 lockfile 与 patch hash；
+的回归检查），`hm-module-negative` 断言禁止再声明 welcome 确认状态，`dsh`/`dsh-desktop`
+构建重包，`runtime-lockfile` 校验 lockfile 与 patch hash；
 `scripts/verify-web.sh` 用临时 `DSH_HOME` 验证 token URL → 303 → 200。agent 入口见
 [AGENTS.md](AGENTS.md)。
 
