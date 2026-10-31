@@ -84,3 +84,4 @@ bash scripts/verify-web.sh --package /nix/store/…-dsh-0.2.2-alpha.2
 | 浏览器 403 / Host rejected | 用 bind IP 访问；若必须用域名，加 `--trusted-host <authority>` |
 | 找不到 token URL | `tmux attach -t dsh-web`；不要从旧日志里复用已失效的 URL |
 | tailnet 打不开 | `tailscale status` 确认两端在线；`--host` 必须是本机 tailnet 地址 |
+| 预览版说明点「继续」报“暂时无法保存确认状态” | home patch 里的 `ui-settings-general.welcomeNoticeVersion` 与当前 `WELCOME_NOTICE_VERSION` 不一致（0.2.2-alpha.2 是 `2026-09-28.1`）；home 层优先级高于 UI 写入，必须把声明值改成当前版本，或删掉这一行让 UI 自行持久化。改完重启 Web（或重新 switch 生成 patch） |

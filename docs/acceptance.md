@@ -167,10 +167,16 @@ sudo nixos-rebuild switch --rollback
   已是 `4ji19qaq…-dsh-desktop-0.2.2-alpha.2`，`verify-desktop.sh` 再次 ALL PASSED。
 - [x] laptop tailnet Web surface：手动起在 `100.64.0.3:3080`，token 303 → cookie 200，
   `__DSH_BOOT__` 存在；浏览器内的真实对话验收见下一条。
+- [x] 预览版说明无法继续（已修复）：home patch 的
+  `ui-settings-general.welcomeNoticeVersion` 还是 `2026-08-13.1`，而 0.2.2-alpha.2 的
+  `WELCOME_NOTICE_VERSION` 是 `2026-09-28.1`；home 层优先级高于 UI 写入，所以
+  Continue 报“暂时无法保存确认状态”。已在 nixos-config `7ab0e6a` 把声明值更新为当前版本，
+  构建出新的 HM patch，并临时把 `~/.dsh/cordis.patch.yml` 指向它后重启 Web；模态框消失，
+  输入框可用。下次 `nixos-rebuild switch` 会永久生效。
 - [ ] laptop Web 浏览器对话：用户打开 token URL 并完成一次模型/bash 往返（进行中）。
 - [ ] home 切换与手动 Web：用户明确「home 先不着急」，暂缓。home 当前仍是旧
   generation（`df24z8…`，2026-09-29），`nixos-config` checkout 在 `04da93b`。
-  laptop 主分支已合并 home 的本机提交并包含 pki 修复（`4bcd859`），只差
+  laptop 主分支已合并 home 的本机提交并包含 pki 修复（当前 `7ab0e6a`），只差
   `git push origin main`；home 需要 `git pull --ff-only` 后由用户执行
   `sudo nixos-rebuild switch --flake .#home`（sudo 需要密码）。
 - home 构建曾遇到一个与本仓库无关的 `nss-cacert` 失败：home 的
@@ -178,7 +184,7 @@ sudo nixos-rebuild switch --rollback
   `emSign ECC Root CA - G3` 写进 `security.pki.caCertificateBlacklist`，导致
   `buildcatrust` 报 “blocklist 中的证书不存在”。已在 `merge-home` 的 `4bcd859`
   移除该条；修复后 home 与 laptop 的 `system.build.toplevel` **均构建成功**。
-  合并/切换命令（laptop 的 `main` 已 fast-forward 到 `4bcd859`，只需推送）：
+  合并/切换命令（laptop 的 `main` 已包含 `4bcd859` 与 `7ab0e6a`，只需推送）：
 
   ```sh
   # laptop
