@@ -52,7 +52,7 @@ mapfile -t nixfiles < <(find "$REPO" -name '*.nix' -not -path '*/.update/*' -typ
 check nixfmt nixfmt --check "${nixfiles[@]}"
 
 section "flake tracked files"
-untracked=$(git -C "$REPO" ls-files --others --exclude-standard -- '*.nix' flake.nix)
+untracked=$(git -C "$REPO" ls-files --others --exclude-standard -- '*.nix' 'scripts/*.sh' 'patches/*.patch' flake.nix)
 if [ -n "$untracked" ]; then
   printf 'FAIL  untracked Nix files are invisible to flake path input; git add first:\n%s\n' "$untracked"
   fail=$((fail + 1))
@@ -64,8 +64,9 @@ section "flake eval"
 check "nix flake check --no-build" nix flake check --no-build "$REPO"
 
 section "lightweight checks"
-check "checks (hm-module/scripts/runtime-lockfile)" \
+check "checks (hm-module/hm-module-negative/scripts/runtime-lockfile)" \
   nix build "$REPO#checks.x86_64-linux.hm-module" \
+            "$REPO#checks.x86_64-linux.hm-module-negative" \
             "$REPO#checks.x86_64-linux.scripts" \
             "$REPO#checks.x86_64-linux.runtime-lockfile" \
             --no-link

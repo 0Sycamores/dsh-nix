@@ -25,7 +25,7 @@ DSH 桌面端与 Web/CLI 的 Nix/NixOS 打包（个人自用、非官方）。�
 
 ## Gotchas
 
-- 新增 `.nix` 文件必须先 `git add`；flake path input 看不到未跟踪文件（`scripts/check.sh` 会预检）。
+- 新增参与 flake 检查的文件（`.nix`、`scripts/*.sh`、`patches/*.patch`）必须先 `git add`；flake path input 看不到未跟踪文件（`scripts/check.sh` 会预检）。
 - 排查 UI 文案/行为读 `$DSH_SRC`（`nix develop` 设置）的源码，不要 `rg` 打包后的 `*-frontend/dist`：minified 单行，输出巨大且没有上下文。
 - 临时 JSON/网络检查可 `nix develop -c jq …` / `nix develop -c curl …`；宿主 PATH 未必有 jq。
 - `nix eval` 不要读取派生输出里的文件（会触发 IFD/卡住）；版本等值从 flake 传入。

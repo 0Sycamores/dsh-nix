@@ -8,7 +8,7 @@
       url = "github:deepseek-ai/deepseek-harness/dsh-v0.2.2-alpha.2";
       flake = false;
     };
-    # 仅用于 checks.hm-module：在 CI/本地渲染 HM 模块输出，不必等用户切换。
+    # 仅用于 checks.hm-module / hm-module-negative：在 CI/本地渲染 HM 模块输出，不必等用户切换。
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -98,6 +98,10 @@
           dsh-desktop = self.packages.${system}.dsh-desktop;
           # 轻量门禁：不构建 1.3G 桌面端，只渲染 HM 输出/静态检查。
           hm-module = pkgs.callPackage ./nix/tests/hm-module.nix {
+            inherit home-manager;
+            dsh-nix = self;
+          };
+          hm-module-negative = pkgs.callPackage ./nix/tests/welcome-pin.nix {
             inherit home-manager;
             dsh-nix = self;
           };

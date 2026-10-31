@@ -23,7 +23,6 @@ let
   # shell 段在本仓库目标平台 Linux 上映射到 bash-sandbox）。
   legacySettingsIds = {
     "ui-developer-tools" = "ui-settings";
-    "ui-onboarding" = "ui-settings-general";
     "shell" = "bash-sandbox";
   };
 
@@ -95,7 +94,7 @@ in
       default = { };
       description = ''
         声明式设置：键为 patch 行 id，值为该行的 config。写入
-        $DSH_HOME/cordis.patch.yml；旧 settings.yaml 键名（如 ui-onboarding）会重映射。
+        $DSH_HOME/cordis.patch.yml；旧 settings.yaml 键名（如 ui-developer-tools）会重映射。
 
         注意：上游 patch 语义是**整行替换**该 id 的 config，不是深合并。每行必须写全
         需要的键（例如 permission 行要连同 presets 一起写），否则该行原有键会被清掉。

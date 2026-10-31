@@ -97,6 +97,10 @@ sudo nixos-rebuild switch --rollback
   HM patch 已构建确认不含该行；下次 switch 后首次会看到一次说明，点 Continue 即可。
   临时用当前版本 patch 的浏览器对话已验收（见下一条），但“无声明 + UI 持久化”还需
   在下次 switch 后点一次 Continue 复核。
+- 临时状态：`~/.dsh/cordis.patch.yml` 目前指向新构建的 HM generation
+  （`/nix/store/rn879…-home-manager-generation/home-files/.dsh/cordis.patch.yml`，不含
+  welcome 行），不属于当前 `/run/current-system`。下次 `nixos-rebuild switch` 会把它
+  归一到新 generation；不要把这个 symlink 当成系统状态的一部分。
 - [x] laptop Web 浏览器对话：用户在新标签页发送 `pwd`；Host 调用 bash 工具，返回
   `/home/sycamore/Projects/dsh-nix`，assistant 复述该路径并完成 turn（session
   `f85071c5…`，2026-10-31 14:31）。测试用 Web surface 已停止（3080 关闭）。

@@ -87,7 +87,8 @@ programs.dsh-desktop.enable = true;
 `programs.dsh` 是共享设置的**唯一写入者**：它生成 `~/.dsh/cordis.patch.yml`（home 层 patch，
 对所有 profile 生效，优先于 profile 层），并安装一个会 source `environmentFiles`、固定
 `DSH_HOME` 的 `dsh` wrapper。桌面模块只读这些值，不再写设置文件。旧 `settings.yaml` 的键名
-（如 `ui-onboarding`）会按上游迁移表重映射。
+（如 `ui-developer-tools`）会按上游迁移表重映射；`ui-onboarding` / `welcomeNoticeVersion` 例外——
+预览版说明的确认状态由 UI 自己保存，声明会被断言拒绝。
 
 `programs.dsh-desktop` 只提供 Electron 外壳、launcher 和 desktop entry；它需要
 `programs.dsh.enable = true`。推荐通过桌面入口或 `~/.local/bin/dsh-desktop` 启动（会注入
