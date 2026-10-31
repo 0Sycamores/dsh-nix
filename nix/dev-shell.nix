@@ -24,6 +24,7 @@ pkgs.mkShell {
     nixfmt
     file
     desktop-file-utils
+    curl
   ];
 
   DSH_SRC = "${dsh-src}";

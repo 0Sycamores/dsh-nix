@@ -67,6 +67,28 @@ check "verify-desktop --self-test" bash "$REPO/scripts/verify-desktop.sh" --self
 if [ "$FULL" -eq 1 ]; then
   section "full desktop build"
   check "nix build .#dsh-desktop" nix build "$REPO#dsh-desktop" --no-link
+
+  section "full dsh (CLI/web) build"
+  if dsh_out=$(nix build "$REPO#dsh" --no-link --print-out-paths); then
+    printf 'ok    nix build .#dsh\n'
+    if [ -x "$dsh_out/bin/dsh" ]; then
+      printf 'ok    dsh executable\n'
+    else
+      printf 'FAIL  dsh executable missing\n'
+      fail=$((fail + 1))
+    fi
+    if nix-store -qR "$dsh_out" | grep -Eq -- 'electron[-_]'; then
+      printf 'FAIL  .#dsh closure unexpectedly contains Electron:\n'
+      nix-store -qR "$dsh_out" | grep -E -- 'electron[-_]' | sed 's/^/      /'
+      fail=$((fail + 1))
+    else
+      printf 'ok    .#dsh closure has no Electron\n'
+    fi
+    check "verify-web" bash "$REPO/scripts/verify-web.sh" --package "$dsh_out"
+  else
+    printf 'FAIL  nix build .#dsh\n'
+    fail=$((fail + 1))
+  fi
 fi
 
 printf '\n'

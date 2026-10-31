@@ -55,10 +55,17 @@
           # electron_44-bin dist（同样的 44.9.3 官方产物，wrapper 由本包自带）。
           electron44bin = pkgs."electron_44-bin";
         };
+      mkDsh =
+        pkgs: payload:
+        pkgs.callPackage ./nix/cli.nix {
+          runtime = mkRuntime pkgs payload;
+          version = srcVersion;
+        };
     in
     {
       packages = forAllSystems (
         pkgs: system: {
+          dsh = mkDsh pkgs (mkPayload pkgs);
           dsh-desktop = mkDesktop pkgs;
           dsh-desktop-payload = mkPayload pkgs;
           dsh-desktop-runtime = mkRuntime pkgs (mkPayload pkgs);
@@ -67,11 +74,13 @@
       );
 
       overlays.default = final: prev: {
+        dsh = mkDsh final (mkPayload final);
         dsh-desktop = mkDesktop final;
       };
 
       homeModules = {
         default = ./nix/modules/desktop.nix;
+        dsh = ./nix/modules/dsh.nix;
         dsh-desktop = ./nix/modules/desktop.nix;
       };
 
@@ -85,6 +94,7 @@
 
       checks = forAllSystems (
         pkgs: system: {
+          dsh = self.packages.${system}.dsh;
           dsh-desktop = self.packages.${system}.dsh-desktop;
           # 轻量门禁：不构建 1.3G 桌面端，只渲染 HM 输出/静态检查。
           hm-module = pkgs.callPackage ./nix/tests/hm-module.nix {

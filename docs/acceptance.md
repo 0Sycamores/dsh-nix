@@ -1,9 +1,12 @@
 # 切换与验收清单（Gate 2 人工部分）
 
-> 验收记录：2026-10-31，`laptop` 主机 `nixos-rebuild switch --flake .#laptop` 后
+> 桌面阶段验收记录：2026-10-31，`laptop` 主机 `nixos-rebuild switch --flake .#laptop` 后
 > `scripts/verify-desktop.sh` **全部 PASS**；桌面端已从应用启动器正常启动并日常使用
-> （窗口 `app_id=deepseek-harness`、Host 就绪、home patch 5 层生效）；旧 CLI
-> `dsh --version` 仍为 `0.2.2-alpha.2`。
+> （窗口 `app_id=deepseek-harness`、Host 就绪、home patch 5 层生效）。
+>
+> **Web/CLI 阶段（2026-10-31）已删除旧 `pkgs/dsh`**：终端 `dsh` 现由
+> `programs.dsh` + 新 `packages.dsh` 提供；下面的 1–8 是桌面阶段的历史记录，其中
+> “旧 CLI 不受影响”已不再适用。Web 阶段验收见文末。
 
 ## nixos-config 接线（已提交到本地仓库，未推送）
 
@@ -79,3 +82,63 @@ sudo nixos-rebuild switch --rollback
 - Host/CLI 跑 runtime 自带官方 Node，依赖系统 `nix-ld`（已启用）。
 - 上游 release smoke 在构建中跳过，真实启动与上述手动项替代。
 - 仅 x86_64-linux / Wayland 验证；X11 未验证。
+
+## Web/CLI 阶段（2026-10-31）
+
+### nixos-config 接线
+
+- 删除本地自封装 `pkgs/dsh` 与 `sycamore.dsh`；终端 `dsh` 改由 `programs.dsh` 提供。
+- `modules/development/dsh.nix`：overlay + `home-manager.sharedModules`（home 用
+  `homeModules.dsh`）+ `programs.dsh.{enable,environmentFiles,settings}`；home 只 import
+  这个模块，不装桌面包。
+- `modules/development/dsh-desktop.nix`：只设 `programs.dsh-desktop.enable`，并 import
+  `homeModules.default`（桌面模块内部 import 共享模块）；laptop 同时启用两者。
+- 声明式 settings 从 `programs.dsh-desktop.settings` 迁到 `programs.dsh.settings`。
+
+切换：
+
+```sh
+cd ~/.nixos-config
+sudo nixos-rebuild switch --flake .#laptop   # laptop（桌面 + CLI/Web）
+sudo nixos-rebuild switch --flake .#home     # home（仅 CLI/Web；在 home 上执行）
+```
+
+### 构建/自动验收（在仓库内）
+
+```sh
+nix build .#dsh
+result/bin/dsh --version
+bash scripts/verify-web.sh --package "$(nix build .#dsh --no-link --print-out-paths)"
+bash scripts/check.sh --full
+```
+
+`verify-web.sh` 用临时 `DSH_HOME` 启动 `dsh web --no-open --port 0`，断言 token URL 的
+303、cookie 交换后的 200、页面含 `__DSH_BOOT__`；不碰真实 `~/.dsh`。
+
+### home 手动 Web 验收
+
+```sh
+tmux new -As dsh-web 'dsh web --no-open --host "$(tailscale ip -4)" --port 3080'
+# 复制打印出的 token URL，在 laptop 浏览器打开
+```
+
+1. 页面加载，发一条消息，确认模型与 bash 工具可用。
+2. `ss -ltnp | grep 3080` 只显示 `<tailnet-ip>:3080`，没有 `0.0.0.0` / `[::]`。
+3. 重启 web 后旧 token URL 失效；重新拿新 URL，历史会话仍在。
+4. laptop 桌面端正常；桌面与 web 同时运行时，同一会话只在一个 surface 打开
+   （另一个会提示 "This session is already in use…"）。
+
+### 回滚
+
+```sh
+sudo nixos-rebuild switch --rollback
+```
+
+回滚到上一个 generation 会恢复旧 `pkgs/dsh`；`~/.dsh` 数据不受影响。
+
+### 验收记录
+
+- [ ] `.#dsh` 构建 + `verify-web.sh` 通过。
+- [ ] laptop 切换后桌面端正常，终端 `dsh --version` = `0.2.2-alpha.2`。
+- [ ] home 切换后仅 `programs.dsh` 生效，手动 Web 可从 laptop 访问。
+- [ ] tailnet 之外不可达；无公网 bind/nginx vhost。
