@@ -163,28 +163,26 @@ sudo nixos-rebuild switch --rollback
   `4ji19qaq6a6spbdd88q54jqb152b4qjh-dsh-desktop-0.2.2-alpha.2` 的 launcher/entry/icon/
   home patch 均正确；home patch 5 个 layer 命中，`danger-full-access` 生效。
 - [x] `scripts/verify-web.sh`：token URL 303 → cookie 200，`__DSH_BOOT__` 存在。
-- [ ] 新桌面包实际开窗：当前运行中的 Electron 仍是切换前的
-  `631z4mmdp50cli1fr9pv5ndk753ivlbi-dsh-desktop`（它同时承载本会话的 Web GUI，
-  不能在会话内重启）；需要用户关闭并重新打开桌面端一次。
-- [ ] home 切换与手动 Web：home 当前仍是旧 generation（`df24z8…`，2026-09-29），
-  `nixos-config` checkout 在 `04da93b`，`/etc/profiles/per-user/sycamore/bin/dsh` 仍指向
-  旧 `cpv5…-home-manager-path`（`dsh --version` = `0.2.0-rc.2`）。laptop 分支
-  （`9f888eb` 之后）与 home 的 `04da93b`（udev/EDL 等本机提交）已分叉，不能直接
-  `git pull`；已用临时 clone 做合并预演（`GIT_LFS_SKIP_SMUDGE=1`），两边历史
-  **自动合并无冲突**。合并结果已在本地分支 `merge-home` 准备好（merge commit
-  `0465d37`），等待用户合并/推送后再 switch。
-  home 的 sudo 需要密码，切换必须由用户在 home 上执行。
+- [x] 新桌面包实际开窗：2026-10-31 14:18 用户重启桌面端，运行中的 Electron/Host
+  已是 `4ji19qaq…-dsh-desktop-0.2.2-alpha.2`，`verify-desktop.sh` 再次 ALL PASSED。
+- [x] laptop tailnet Web surface：手动起在 `100.64.0.3:3080`，token 303 → cookie 200，
+  `__DSH_BOOT__` 存在；浏览器内的真实对话验收见下一条。
+- [ ] laptop Web 浏览器对话：用户打开 token URL 并完成一次模型/bash 往返（进行中）。
+- [ ] home 切换与手动 Web：用户明确「home 先不着急」，暂缓。home 当前仍是旧
+  generation（`df24z8…`，2026-09-29），`nixos-config` checkout 在 `04da93b`。
+  laptop 主分支已合并 home 的本机提交并包含 pki 修复（`4bcd859`），只差
+  `git push origin main`；home 需要 `git pull --ff-only` 后由用户执行
+  `sudo nixos-rebuild switch --flake .#home`（sudo 需要密码）。
 - home 构建曾遇到一个与本仓库无关的 `nss-cacert` 失败：home 的
   `modules/core/pki.nix` 把 NSS 3.131.1 已从 certdata 移除的
   `emSign ECC Root CA - G3` 写进 `security.pki.caCertificateBlacklist`，导致
   `buildcatrust` 报 “blocklist 中的证书不存在”。已在 `merge-home` 的 `4bcd859`
   移除该条；修复后 home 与 laptop 的 `system.build.toplevel` **均构建成功**。
-  合并/切换命令：
+  合并/切换命令（laptop 的 `main` 已 fast-forward 到 `4bcd859`，只需推送）：
 
   ```sh
   # laptop
   cd ~/.nixos-config
-  git checkout main && git merge --ff-only merge-home
   git push origin main
 
   # home（用户执行）
