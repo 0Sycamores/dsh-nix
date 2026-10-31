@@ -168,7 +168,8 @@ sudo nixos-rebuild switch --rollback
   不能在会话内重启）；需要用户关闭并重新打开桌面端一次。
 - [ ] home 切换与手动 Web：home 当前仍是旧 generation（`df24z8…`，2026-09-29），
   `nixos-config` checkout 在 `04da93b`，`/etc/profiles/per-user/sycamore/bin/dsh` 仍指向
-  旧 `cpv5…-home-manager-path`。laptop 分支（`9f888eb` 之后）与 home 的
-  `04da93b`（udev/EDL 等本机提交）已分叉，不能直接 `git pull`；需要先合并历史
-  （或把 home 的本机提交 cherry-pick 到 laptop 分支），再把 `c20142f` 同步过去。
+  旧 `cpv5…-home-manager-path`（`dsh --version` = `0.2.0-rc.2`）。laptop 分支
+  （`9f888eb` 之后）与 home 的 `04da93b`（udev/EDL 等本机提交）已分叉，不能直接
+  `git pull`；已用临时 clone 做合并预演（`GIT_LFS_SKIP_SMUDGE=1`），两边历史
+  **自动合并无冲突**。需要用户按预演结果合并后再 switch。
   home 的 sudo 需要密码，切换必须由用户在 home 上执行。
