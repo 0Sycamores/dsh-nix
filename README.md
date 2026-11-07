@@ -1,12 +1,15 @@
 # dsh-nix
 
+> **已归档（2026-11-08）**：nixpkgs 已提供上游 `deepseek-harness`（CLI + Web），本仓库不再维护。
+> 自封装的目的已被上游打包取代，Electron 桌面壳随之退役；要恢复桌面端，请检出归档前的提交。
+
 DSH（DeepSeek Harness）的 Linux/NixOS 打包 —— **个人自用、非官方**。提供桌面端和共享同一份
 运行时的终端/Web CLI。
 
 - 基线：`dsh-v0.2.2-alpha.2`
 - 目标：NixOS / x86_64-linux / Wayland
-- 状态：桌面端 Gate 0/1/2/3 与 laptop 上的 tailnet Web 已完成验收；home 的 Web 部署
-  按用户要求暂缓（见 [docs/acceptance.md](docs/acceptance.md)）
+- 状态：**已归档**（原状态：桌面端 Gate 0/1/2/3 与 laptop 上的 tailnet Web 已完成验收；home 的
+  Web 部署按用户要求暂缓，见 [docs/acceptance.md](docs/acceptance.md)）
 - 许可：MIT（见 [LICENSE](LICENSE)、[NOTICE](NOTICE)）
 
 ## 两个包
